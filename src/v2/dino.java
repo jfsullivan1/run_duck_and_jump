@@ -317,18 +317,15 @@ public class dino extends PApplet implements ApplicationConstants {
 			}
 		}
 		
-		for (int i = 0; i < objectList_.size(); i++) {	
+		for (int i = 0; i < objectList_.size(); i++) {
 			//Check hit
-			if(objectList_.get(i) instanceof AnimatedBox)
-			{
-				if(objectList_.get(i).x_ <= XMIN + 200 && objectList_.get(i).x_ > XMIN + 150)
-				{
-					health --;
+			if (objectList_.get(i) instanceof AnimatedBox) {
+				if (objectList_.get(i).x_ <= XMIN + 200 && objectList_.get(i).x_ > XMIN + 150) {
+					health--;
 					objectList_.remove(i);
 				}
-			}
-			else if(objectList_.get(i).x_ <= XMIN + 200 && objectList_.get(i).x_ > XMIN + 150 && state != 3) { 
-				health --;
+			} else if (objectList_.get(i).x_ <= XMIN + 200 && objectList_.get(i).x_ > XMIN + 150 && state != 3) {
+				health--;
 				objectList_.remove(i);
 			}
 		}
@@ -455,6 +452,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	 			}
 				obj.drawAllQuadrants(gc);
 	 		}
+
 	 		for (GraphicObject obj : bullets)
 				obj.draw(gc);
 	 		// 	Draw a horizontal line for the "ground"
