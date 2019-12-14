@@ -25,6 +25,8 @@ public class dino extends PApplet implements ApplicationConstants {
 	//-----------------------------
 	ArrayList<GraphicObject> backgroundList_;
 	
+	ArrayList<GraphicObject> bullets;
+	
 	/**	Previous value of the off-screen buffer (after the last call to draw()
 	 */
 	private PGraphics lastBuffer_;
@@ -281,6 +283,7 @@ public class dino extends PApplet implements ApplicationConstants {
 		
 		objectList_ = new ArrayList<GraphicObject>();
 		backgroundList_ = new ArrayList<GraphicObject>();
+		bullets = new ArrayList<GraphicObject>();
 		offScreenBuffer_ = createGraphics(width, height);
 		GraphicObject.setAnimationMode(animationMode_);
 		addEllipse(backgroundList_, imageCloud);
@@ -288,7 +291,6 @@ public class dino extends PApplet implements ApplicationConstants {
 	}
 	
 	public void addEllipse(ArrayList<GraphicObject> objectList, PImage image) { 
-		
 		if(image == imageCloud) { 
 			objectList.add(new AnimatedEllipse(XMAX, random(YMAX-300, YMAX), 3.1415f, random(100,200), random(100,200), LINK_COLOR, random(-50, -500)-speed, 0, 0, image));
 		}else if(image == imageTree) { 
@@ -311,7 +313,7 @@ public class dino extends PApplet implements ApplicationConstants {
 				text("Last high score: " + high_score, 270, 750);
 			}
 		}
-		else
+    else
 		{
 			PGraphics gc;
 			for (int i = 0; i < objectList_.size(); i++) {
@@ -320,7 +322,24 @@ public class dino extends PApplet implements ApplicationConstants {
 					objectList_.remove(i);
 					score += 1;
 				}
+      }
+
+		
+		for (int i = 0; i < bullets.size(); i++) {
+			//Check bounds
+			if(bullets.get(i).x_ >= XMAX) { 
+				bullets.remove(i);
+				score += 1;
 			}
+		}
+		
+		for (int i = 0; i < objectList_.size(); i++) {	
+			//Check hit
+			if(objectList_.get(i).x_ <= XMIN + 200 && objectList_.get(i).x_ > XMIN + 150 && state != 3) { 
+				health --;
+				objectList_.remove(i);
+			}
+		}
 			
 			for (int i = 0; i < objectList_.size(); i++) {	
 				//Check hit
@@ -344,8 +363,6 @@ public class dino extends PApplet implements ApplicationConstants {
 				if(backgroundList_.get(i).x_ <= XMIN) { 
 					backgroundList_.remove(i);
 				}
-			}
-			
 			
 			if(random(0,9000) < (40 - objectList_.size()*10)) { 
 				addEllipse(objectList_, imageCircle);
@@ -357,6 +374,7 @@ public class dino extends PApplet implements ApplicationConstants {
 			if(random(0,30000) < (100 - backgroundList_.size()*10)) { 
 				addEllipse(backgroundList_, imageTree);
 			}
+		}
 			
 			
 			
@@ -433,6 +451,8 @@ public class dino extends PApplet implements ApplicationConstants {
 	 		//Ellipses
 	 		for (GraphicObject obj : objectList_)
 				obj.drawAllQuadrants(gc);
+	 		for (GraphicObject obj : bullets)
+				obj.draw(gc);
 	 		// 	Draw a horizontal line for the "ground"
 	 		gc.translate(0, -200);
 	 		gc.stroke(0);
@@ -588,6 +608,11 @@ public class dino extends PApplet implements ApplicationConstants {
 			//  update the state of the objects ---> physics
 			float dt = (time - lastUpdateTime_)*0.001f;
 			
+			for (GraphicObject obj: bullets)
+			{
+				obj.update(dt);
+			}
+			
 			for (GraphicObject obj : objectList_)
 			{
 				if (obj instanceof AnimatedObject)
@@ -600,6 +625,10 @@ public class dino extends PApplet implements ApplicationConstants {
 				if (obj instanceof AnimatedObject)
 					obj.update(dt);
 
+			}
+			for (GraphicObject obj: bullets)
+			{
+				obj.update(dt);
 			}
 		}
 
@@ -642,6 +671,10 @@ public class dino extends PApplet implements ApplicationConstants {
 		case 'f':
 			drawRefFrame_ = !drawRefFrame_;
 			GraphicObject.setDrafReferenceFrame(drawRefFrame_);
+			break;
+		case 'w':
+			if(state != 3 && bullets.size() < 1)
+				bullets.add(new Bullet(XMIN+200, YMAX-525,0,20,20,0,400,0,0));
 			break;
 		
 		}
