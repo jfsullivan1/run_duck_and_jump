@@ -121,6 +121,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	PImage imageCloud;
 	PImage imageTree;
 	PImage imageHeart;
+	PImage imageWood;
 	
 	//-----------------------------
 	//	Modifies the time interval of the jump, (lower = longer)
@@ -253,6 +254,7 @@ public class dino extends PApplet implements ApplicationConstants {
 		imageCloud = loadImage("data/cloud.png");
 		imageTree = loadImage("data/tree.png");
 		imageHeart = loadImage("data/heart.png");
+		imageWood = loadImage("data/wood.png");
 		
 		//-----------------------------
 		//	add random amount of ellipses
@@ -276,6 +278,8 @@ public class dino extends PApplet implements ApplicationConstants {
 			objectList.add(new AnimatedEllipse(XMAX, random(YMAX-300, YMAX), 3.1415f, random(100,200), random(100,200), LINK_COLOR, random(-50, -500)-speed, 0, 0, image));
 		}else if(image == imageTree) { 
 			objectList.add(new AnimatedEllipse(XMAX, YMIN+160, 3.1415f, 100, 200, LINK_COLOR, random(-50, -500)-speed, 0, 0, image));
+		}else if(image == imageWood) {
+			objectList.add(new AnimatedBox(XMAX,YMIN+15,0,100,600,image,-300-speed,0,0));
 		}else {
 			objectList.add(new AnimatedEllipse(XMAX, YMIN+15, 0, 60, 60, LINK_COLOR, -300-speed, 0, 0, image));
 		}
@@ -310,25 +314,24 @@ public class dino extends PApplet implements ApplicationConstants {
 			//Check bounds
 			if(bullets.get(i).x_ >= XMAX) { 
 				bullets.remove(i);
-				score += 1;
 			}
 		}
 		
 		for (int i = 0; i < objectList_.size(); i++) {	
 			//Check hit
-			if(objectList_.get(i).x_ <= XMIN + 200 && objectList_.get(i).x_ > XMIN + 150 && state != 3) { 
-				health --;
-				objectList_.remove(i);
-			}
-			
-			for (int i = 0; i < objectList_.size(); i++) {	
-				//Check hit
-				if(objectList_.get(i).x_ <= XMIN + 200 && objectList_.get(i).x_ > XMIN + 150 && state != 3) { 
-					score -= 1;
+			if(objectList_.get(i) instanceof AnimatedBox)
+			{
+				if(objectList_.get(i).x_ <= XMIN + 200 && objectList_.get(i).x_ > XMIN + 150)
+				{
 					health --;
 					objectList_.remove(i);
 				}
 			}
+			else if(objectList_.get(i).x_ <= XMIN + 200 && objectList_.get(i).x_ > XMIN + 150 && state != 3) { 
+				health --;
+				objectList_.remove(i);
+			}
+		}
 			if(health == 0) {
 				if(score > high_score) { 
 					high_score = score;
@@ -343,10 +346,12 @@ public class dino extends PApplet implements ApplicationConstants {
 				if(backgroundList_.get(i).x_ <= XMIN) { 
 					backgroundList_.remove(i);
 				}
-			}
 			
 			if(random(0,9000) < (40 - objectList_.size()*10)) { 
 				addEllipse(objectList_, imageCircle);
+			}
+			else if(random(0,25000) < (40 - objectList_.size()*10)) { 
+				addEllipse(objectList_, imageWood);
 			}
 			
 			if(random(0,30000) < (100 - backgroundList_.size()*10)) { 
@@ -355,7 +360,7 @@ public class dino extends PApplet implements ApplicationConstants {
 			if(random(0,30000) < (100 - backgroundList_.size()*10)) { 
 				addEllipse(backgroundList_, imageTree);
 			}
-    }
+		}
 			
 			
 			
@@ -429,9 +434,29 @@ public class dino extends PApplet implements ApplicationConstants {
 	 		}
 	 		popMatrix();
 	 		
-	 		//Ellipses
+	 		//Interactable objects.
+	 		outerloop:
 	 		for (GraphicObject obj : objectList_)
+	 		{
+	 			if (obj instanceof AnimatedBox)
+	 			{
+	 				for (GraphicObject obj2 : bullets)
+	 				{
+	 					if ( ((AnimatedBox) obj).isHit(obj2.x_, obj2.y_, obj2.height_/2))
+	 					{
+	 						//System.out.println(obj2.x_);
+	 						//System.out.println(obj.x_);
+	 						objectList_.remove(obj);
+	 						bullets.remove(obj2);
+	 						break outerloop;
+	 					}
+	 					
+	 				}
+	 			}
 				obj.drawAllQuadrants(gc);
+	 		}
+	 		for (GraphicObject obj : bullets)
+				obj.draw(gc);
 	 		// 	Draw a horizontal line for the "ground"
 	 		gc.translate(0, -200);
 	 		gc.stroke(0);
@@ -647,7 +672,7 @@ public class dino extends PApplet implements ApplicationConstants {
 			GraphicObject.setDrafReferenceFrame(drawRefFrame_);
 			break;
 		case 'w':
-			if(state != 3)
+			if(state != 3 && bullets.size() < 1)
 				bullets.add(new Bullet(XMIN+200, YMAX-525,0,20,20,0,400,0,0));
 			break;
 		

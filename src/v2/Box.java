@@ -2,6 +2,7 @@ package v2;
 
 import processing.core.*;
 import v2.GraphicObject; 
+import java.lang.Math;
 
 /**	The Box class rewritten as a subclass of GraphicObject
  * 
@@ -156,8 +157,9 @@ public class Box extends GraphicObject
 			g.rect(0,  0,  width_, height_);
 		else
 		{
-			g.scale(scaleX_, scaleY_);
-			g.image(image_, 0, 0,  image_.width, image_.height);
+			g.pushMatrix();
+			g.image(image_, -25, -25,  image_.width, image_.height);
+			g.popMatrix();
 		}
 		g.popMatrix();
 	}
@@ -197,6 +199,28 @@ public class Box extends GraphicObject
 		double xb = cosAngle*(x - x_) + sinAngle*(y - y_);
 		double yb = cosAngle*(y - y_) + sinAngle*(x_ - x);
 		return ((PApplet.abs((float) xb) <= width_/2) && (PApplet.abs((float) yb) <= height_/2));
+	}
+	
+	public boolean isHit(float cx, float cy, float radius)
+	{
+		float testX = cx;
+		float testY = cy;
+		
+		if (cx < x_) testX = x_;
+		else if (cx> x_+width_) testX = x_+width_;
+		if(cy<y_) testY = y_;
+		else if(cy>y_+height_) testY = y_+height_;
+		
+		float distX = cx-testX;
+		float distY = cy-testY;
+		float distance = (float) Math.sqrt( (distX*distX) + (distY*distY) );
+		System.out.println(distance);
+		System.out.println(radius);
+		if (distance <= radius)
+		{
+			return true;
+		}
+		return false;
 	}
 	
 }
