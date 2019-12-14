@@ -31,6 +31,25 @@ public class Ellipse extends GraphicObject
 	 * 
 	 */
 	int time_;
+	
+	
+	/**	Constructor. Initializes all instance variables to the values set by the arguments
+	 * 
+	 * @param x			x coordinate of the object's center (in world coordinates)
+	 * @param y			y coordinate of the object's center (in world coordinates)
+	 * @param angle		orientation of the object (in rad)
+	 * @param width		width of the object (in world units)
+	 * @param height	height of the object (in world units)
+	 * @param color		The color is stored as a single int in hex format
+	 * @param vx		Horizontal component of the object's velocity vector (in world units per second)
+	 * @param vy		Vertical component of the object's velocity vector (in world units per second)
+	 * @param spin		Spin of the object (in rad/s)
+	 */
+	public Ellipse(float x, float y, float angle, float width, float height, int color, float vx, 
+					float vy, float spin)
+	{
+		super(x, y, angle, width, height, color, vx, vy, spin);
+	}
 	/**	Constructor. Initializes all instance variables to the values set by the arguments
 	 * 
 	 * @param x			x coordinate of the object's center (in world coordinates)
@@ -93,8 +112,8 @@ public class Ellipse extends GraphicObject
 	 */
 	protected void draw_(PGraphics g)
 	{
-		
-		if(image_ != null) { 
+		if (image_ == null) g.ellipse(0,  0,  width_, height_);
+		else if(image_ != null) { 
 			g.pushMatrix();
 			g.image(image_,-25,-25, width_, height_);
 			g.popMatrix();
