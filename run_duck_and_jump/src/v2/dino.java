@@ -1,0 +1,654 @@
+package v2;
+
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+
+import processing.core.PApplet;
+import processing.core.PGraphics;
+import processing.core.PImage;
+import v2.AnimatedObject;
+import v2.AnimationMode;
+import v2.GraphicObject;
+
+
+
+public class dino extends PApplet implements ApplicationConstants {
+	
+	
+	//-----------------------------
+	//	graphical objects for all object with collisions
+	//-----------------------------
+	ArrayList<GraphicObject> objectList_;
+	
+	//-----------------------------
+	//	graphical objects
+	//-----------------------------
+	ArrayList<GraphicObject> backgroundList_;
+	
+	ArrayList<GraphicObject> bullets;
+	
+	/**	Previous value of the off-screen buffer (after the last call to draw()
+	 */
+	private PGraphics lastBuffer_;
+
+	/** Toggles on-off double buffering.
+	 */
+	private boolean doDoubleBuffer_ = false;
+	
+	/**	Desired rendering frame rate
+	 * 
+	 */
+	static final float RENDERING_FRAME_RATE = 60;
+	
+	/**	Ratio of animation frames over rendering frames 
+	 * 
+	 */
+	static final int ANIMATION_RENDERING_FRAME_RATIO = 5;
+	
+	/**	computed animation frame rate
+	 * 
+	 */
+	static final float ANIMATION_FRAME_RATE = RENDERING_FRAME_RATE * ANIMATION_RENDERING_FRAME_RATIO;
+	
+	/**	A counter for animation frames
+	 * 
+	 */
+	private int frameCount_;
+	
+	/**	Used to pause the animation
+	 */
+	boolean animate_ = true;
+	
+	/**	Variable keeping track of the last time the update method was invoked.
+	 * 	The different between current time and last time is sent to the update
+	 * 	method of each object. 
+	 */
+	private int lastUpdateTime_;
+	
+	/**	Whether to draw the reference frame of each object (for debugging
+	 * purposes.
+	 */
+	private boolean drawRefFrame_ = false;
+	
+	/**	 Keep track of score
+	 * 
+	 */
+	private int score = 0;
+	
+	//-----------------------------
+	//	constants
+	//-----------------------------
+	public final static float ANGLE_INCR = 0.1f;
+	public final static int JOINT_COLOR = 0xFFFF0000;
+	public final static int LINK_COLOR = 0xFFFFFFFF;
+	public final static float JOINT_RADIUS = 0.5f;
+	public final static float JOINT_DIAMETER = 2*JOINT_RADIUS;
+	public final static float LINK_THICKNESS = 7;
+	public final static int TARGET_COLOR = 0xFF00FF00;
+	public static final float TARGET_DIAMETER = 0.5f;
+	private int state = 0;
+	private float movement_v = 0;
+	private float Height = 50;
+	private float Torso_bottom = 50;
+	private float temp = 0;
+	private float global_t = 0;
+	private boolean new_state = true;
+	private float speed = 0;
+	private int high_score = 0;
+	
+	//-----------------------------
+	//	limbs (line lengths)
+	//-----------------------------
+	private float[] L1 = {-10000, 25f, 25f};//Right leg
+	private float[] L2 = {-10000, 25f, 25f};//Left leg
+	private float[] L3 = {-10000, 20f, 20f};//Right Arm
+	private float[] L4 = {-10000, 20f, 20f};//Left Arm
+	
+	//-----------------------------
+	//	animation mode
+	//-----------------------------
+	private AnimationMode animationMode_ = AnimationMode.WINDOW_WORLD;
+	private PGraphics offScreenBuffer_;
+	
+	//-----------------------------
+	//	ellipse image
+	//-----------------------------
+	PImage imageCircle;
+	
+	//-----------------------------
+	//	other images
+	//-----------------------------
+	PImage imageCloud;
+	PImage imageTree;
+	PImage imageHeart;
+	
+	//-----------------------------
+	//	Modifies the time interval of the jump, (lower = longer)
+	//-----------------------------
+	private float modifier = .75f;
+	
+	//-----------------------------
+	//	Health
+	//-----------------------------
+	private int health = 3;
+	
+	//--------------------Right-Leg--------------------------------------------
+	
+	private float [][]keyFrames_rightleg_default = {
+									{-10000, -1.1f, -0.3f, 0.0f}};
+	
+	private float [][]keyFrames_rightleg_walkright = {
+									{-10000, -1.1f, -0.3f, 0.0f},	//Start pos
+									{-10000, -1.0f, -0.7f, (0.1f*modifier)},	//Knee raise
+									{-10000, -1.3f, -0.1f, (0.2f*modifier)}, 	//Bottom Leg foward
+									{-10000, -1.7f, -0.1f, (0.3f*modifier)},	//Leg stride Start
+									{-10000, -2.2f, -0.3f, (0.4f*modifier)},	//Leg stride ->
+									{-10000, -2.5f, -0.5f, (0.5f*modifier)},	//Leg stride End
+									{-10000, -2.1f, -0.7f, (0.6f*modifier)},	//Leg stride Returning
+									{-10000, -1.1f, -0.3f, (0.8f*modifier)}};	//Return to start
+
+	//--------------------Left-Leg---------------------------------------------
+	
+	private float [][]keyFrames_leftleg_default = {
+									{-10000, -2.1f,  0.3f, 0.0f}};
+	
+	private float [][]keyFrames_leftleg_walkright = {
+									{-10000, -2.1f,  0.3f, 0.0f},	//Start pos
+									{-10000, -2.2f, -0.5f, (0.1f*modifier)},	//Leg stride end
+									{-10000, -1.9f, -0.7f, (0.2f*modifier)}, 	//
+									{-10000, -1.5f, -0.8f, (0.3f*modifier)},	//
+									{-10000, -1.0f, -0.4f, (0.4f*modifier)},	//
+									{-10000, -0.7f, -0.1f, (0.5f*modifier)},	//Bottom Leg foward
+									{-10000, -1.1f, -0.1f, (0.6f*modifier)},	//Leg stride Start
+									{-10000, -2.1f,  0.3f, (0.8f*modifier)}};	//Return to start
+
+	
+	//--------------------Right-Arm---------------------------------------------
+	
+	private float [][]keyFrames_rightarm_default = {
+									{-10000, -1.1f,  0.0f, 0.0f}};
+	
+	private float [][]keyFrames_rightarm_jump = {
+									{-10000, -1.1f,  0.0f, 0.0f},	//Start pos
+									{-10000,  0.2f,  0.9f, (0.2f*modifier)},	//Peak
+									{-10000, -1.1f,  0.0f, (0.8f*modifier)}};	//Return to start
+	
+	//--------------------Left-Arm---------------------------------------------
+	
+	private float [][]keyFrames_leftarm_default = {
+									{-10000, -2.1f,  0.0f, 0.0f}};
+	
+	private float [][]keyFrames_leftarm_jump = {
+									{-10000, -2.1f,  0.0f, 0.0f},	//Start pos
+									{-10000, -3.3f, -0.9f, (0.2f*modifier)},	//Peak
+									{-10000, -2.1f,  0.0f, (0.8f*modifier)}};	//Return to start
+	
+	//--------------------Slidiing (Ducking) ----------------------------------
+	
+	private float [][]keyFrames_leftarm_sliding = {
+									{-10000, -5f, 0f, 0f  },
+									{-10000, 20f, 0f, -12f}};
+	private float [][]keyFrames_rightarm_sliding = {
+									{-10000, -2.1f, 0f, 0f  },
+									{-10000, 2f, 0f, 0f}};
+	private float [][]keyFrames_leftleg_sliding = {
+									{-10000, -2.1f, 0f, 0f  },
+									{-10000, 3f, -4f, -5f}};
+	private float [][]keyFrames_rightleg_sliding = {
+									{-10000, -2.1f, 0f, 0f  },
+									{-10000, -1f, -3.1f, -4f}};
+	
+	
+	
+	private KeyframeInterpolator right_leg_interpolator_;
+	private KeyframeInterpolator left_leg_interpolator_;
+	private KeyframeInterpolator right_arm_interpolator_;
+	private KeyframeInterpolator left_arm_interpolator_;
+	private int startTime_;
+
+		
+	public void settings() 
+	{
+		size(WINDOW_WIDTH, WINDOW_HEIGHT);
+	}
+	public void interpolate() { 
+		//-----------------------------
+		//	set up Interpolators depending on state
+		//-----------------------------
+		System.out.println((0.8f*modifier));
+		if(state == 3) {//Jump
+			right_leg_interpolator_ = new LinearKeyframeInterpolator(keyFrames_rightleg_walkright);
+			left_leg_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftleg_walkright);
+			right_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_rightarm_jump);
+			left_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftarm_jump);
+		}else if(state == 4){
+			right_leg_interpolator_ = new LinearKeyframeInterpolator(keyFrames_rightleg_sliding);
+			left_leg_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftleg_sliding);
+			right_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_rightarm_sliding);
+			left_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftarm_sliding);
+		}
+		else{//Default walk
+			right_leg_interpolator_ = new LinearKeyframeInterpolator(keyFrames_rightleg_walkright);
+			left_leg_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftleg_walkright);
+			right_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_rightarm_default);
+			left_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftarm_default);
+		}
+	}
+	
+	
+	public void setup() 
+	{	
+		health = 3;
+		score = 0;
+		speed = 0;
+		interpolate();
+		imageCircle = loadImage("data/thorn.png");
+		imageCloud = loadImage("data/cloud.png");
+		imageTree = loadImage("data/tree.png");
+		imageHeart = loadImage("data/heart.png");
+		
+		//-----------------------------
+		//	add random amount of ellipses
+		//-----------------------------
+		frameRate(ANIMATION_FRAME_RATE);
+		frameCount_ = 0;
+		offScreenBuffer_ = createGraphics(width, height);
+		GraphicObject.setAnimationMode(animationMode_);
+		
+		objectList_ = new ArrayList<GraphicObject>();
+		backgroundList_ = new ArrayList<GraphicObject>();
+		bullets = new ArrayList<GraphicObject>();
+		offScreenBuffer_ = createGraphics(width, height);
+		GraphicObject.setAnimationMode(animationMode_);
+		addEllipse(backgroundList_, imageCloud);
+		addEllipse(backgroundList_, imageTree);
+	}
+	
+	public void addEllipse(ArrayList<GraphicObject> objectList, PImage image) { 
+		if(image == imageCloud) { 
+			objectList.add(new AnimatedEllipse(XMAX, random(YMAX-300, YMAX), 3.1415f, random(100,200), random(100,200), LINK_COLOR, random(-50, -500)-speed, 0, 0, image));
+		}else if(image == imageTree) { 
+			objectList.add(new AnimatedEllipse(XMAX, YMIN+160, 3.1415f, 100, 200, LINK_COLOR, random(-50, -500)-speed, 0, 0, image));
+		}else {
+			objectList.add(new AnimatedEllipse(XMAX, YMIN+15, 0, 60, 60, LINK_COLOR, -300-speed, 0, 0, image));
+		}
+	}
+	
+	public void draw() {
+		
+		PGraphics gc;
+		for (int i = 0; i < objectList_.size(); i++) {
+			//Check bounds
+			if(objectList_.get(i).x_ <= XMIN) { 
+				objectList_.remove(i);
+				score += 1;
+			}
+		}
+		
+		for (int i = 0; i < bullets.size(); i++) {
+			//Check bounds
+			if(bullets.get(i).x_ >= XMAX) { 
+				bullets.remove(i);
+				score += 1;
+			}
+		}
+		
+		for (int i = 0; i < objectList_.size(); i++) {	
+			//Check hit
+			if(objectList_.get(i).x_ <= XMIN + 200 && objectList_.get(i).x_ > XMIN + 150 && state != 3) { 
+				health --;
+				objectList_.remove(i);
+			}
+		}
+		if(health == 0) {
+			if(score > high_score) { 
+				high_score = score;
+			}
+			setup();
+			
+		}
+		
+		for (int i = 0; i < backgroundList_.size(); i++) {
+			if(backgroundList_.get(i).x_ <= XMIN) { 
+				backgroundList_.remove(i);
+			}
+		}
+		
+		
+		if(random(0,9000) < (40 - objectList_.size()*10)) { 
+			addEllipse(objectList_, imageCircle);
+		}
+		
+		if(random(0,30000) < (100 - backgroundList_.size()*10)) { 
+			addEllipse(backgroundList_, imageCloud);
+		}
+		if(random(0,30000) < (100 - backgroundList_.size()*10)) { 
+			addEllipse(backgroundList_, imageTree);
+		}
+		
+		
+		
+		if (doDoubleBuffer_) 
+		{
+			//	I say that the drawing will take place inside of my off-screen buffer
+			gc = offScreenBuffer_;
+			offScreenBuffer_.beginDraw();
+		}
+		else
+			//	Otherwise, the "graphic context" is that of this PApplet
+			gc = this.g;
+		
+		
+		if (doDoubleBuffer_)
+		{
+			offScreenBuffer_.endDraw();
+			image(offScreenBuffer_, 0, 0);				
+
+			
+			lastBuffer_.beginDraw();
+			lastBuffer_.image(offScreenBuffer_, 0, 0);
+			lastBuffer_.endDraw();
+
+			int []pixelLB = lastBuffer_.pixels;
+			int []pixelOSB = offScreenBuffer_.pixels;
+			//int nbPixels = width*height;
+			//	Copy pixel info last buffer
+			for (int i=0, k=height-1; i<height; i++,k--)
+				for (int j=0; j<width; j++)
+					pixelLB[k*width + j] = pixelOSB[i*width + j];
+			
+			lastBuffer_.updatePixels();
+		}
+		for (GraphicObject obj : bullets)
+ 		{
+			obj.draw(gc);
+ 		}
+		gc.background(50, 50, 255);
+		gc.fill(0,0,0);
+		gc.noStroke();
+		
+		if (drawRefFrame_)
+			GraphicObject.drawReferenceFrame(gc);
+		
+		gc.translate(WORLD_X, WORLD_Y);
+ 		
+ 		//	change to world units
+ 		gc.scale(DRAW_IN_WORLD_UNITS_SCALE, -DRAW_IN_WORLD_UNITS_SCALE);	
+ 		
+ 		//Background Objects
+ 		for (GraphicObject obj : backgroundList_)
+			obj.drawAllQuadrants(gc);
+
+ 		
+ 		//Score 
+ 		pushMatrix();
+ 		
+ 		scale(-1, 1);
+ 		rotate(PI);
+ 		scale(5);
+ 		translate(-80, -80);
+ 		gc.text(score, 10, 10);
+ 		
+ 		pushMatrix();
+ 		scale(.4f);
+ 		gc.translate(-10, 60);
+ 		gc.text("High Score:"+high_score, 10, 10);
+ 		popMatrix();
+ 		
+ 		//Health 
+ 		gc.scale(.08f, .08f);
+ 		for(int i = 0; i < health; i++) { 
+ 			gc.image(imageHeart,(150*i), 150);
+ 		}
+ 		popMatrix();
+ 		
+ 		//Ellipses
+ 		for (GraphicObject obj : objectList_)
+			obj.drawAllQuadrants(gc);
+ 		for (GraphicObject obj : bullets)
+ 		{
+			obj.draw(gc);
+ 		}
+ 		
+ 		// 	Draw a horizontal line for the "ground"
+ 		gc.translate(0, -200);
+ 		gc.stroke(0);
+ 		gc.line(XMIN, 0, XMAX, 0);
+ 		gc.fill(50, 200, 50);
+ 		gc.rect(XMIN, 0, 2*XMAX, -200);
+ 		gc.pushMatrix();
+ 		gc.translate(-200, 0);
+ 		
+ 		gc.pushMatrix();
+ 		gc.popMatrix();
+		int currentTime = millis();
+		
+		float t = startTime_ != 0 ? (currentTime - startTime_)*0.001f : 0;
+		//Set for global here for other functions to be on the same "time"
+		global_t = t;
+		
+		//	get current interpolated state for walking right (right leg)
+ 		float []theta1 = right_leg_interpolator_.computeStateVector(t);
+ 		
+ 		//  get current interpolated state for walking right (left leg)
+ 	 	float []theta2 = left_leg_interpolator_.computeStateVector(t);
+ 	 	
+ 	 	// 	get current interpolated state for walking right (right arm)
+ 	 	float []theta3 = right_arm_interpolator_.computeStateVector(t);
+ 	 		
+ 	 	//  get current interpolated state for walking right (left arm)
+ 	 	float []theta4 = left_arm_interpolator_.computeStateVector(t);
+ 		
+ 	 	
+ 	 	
+		if(state == 3 && t <= (.4f*modifier)) { 
+			movement_v += 6;
+		}else if(state == 3 && t <= (.8f*modifier)) { 
+			movement_v -= 6;
+		}
+		
+		
+
+		if(t > (.8f*modifier) || (t == 0 && state == 0) ) { 
+			movement_v = 0;
+			state = 0;
+			interpolate();
+			startTime_ = millis();
+			new_state = true;
+		}
+		
+		gc.translate(0, movement_v);
+		if(state != 4) {
+			gc.stroke(LINK_COLOR);
+			gc.strokeWeight(1);
+			gc.fill(LINK_COLOR);
+			gc.ellipse(0, Height+Torso_bottom+15, Height/3, Height/3);
+			gc.stroke(LINK_COLOR);
+			gc.strokeWeight(LINK_THICKNESS);
+			gc.line(0, Torso_bottom, 0, Height+Torso_bottom);
+			gc.noStroke();
+			gc.translate(0, Torso_bottom);
+		}
+		else
+		{
+			gc.stroke(LINK_COLOR);
+			gc.strokeWeight(1);
+			gc.fill(LINK_COLOR);
+			gc.ellipse(-13, 9, Height/3, Height/3);
+			gc.stroke(LINK_COLOR);
+			gc.strokeWeight(LINK_THICKNESS);
+			gc.line(0, 8, Height, 4);
+			gc.noStroke();
+			gc.translate(0, Torso_bottom);
+		}
+		
+
+			gc.pushMatrix();
+			for (int i=1; i<theta1.length; i++)
+			{
+				gc.rotate(theta1[i]);
+				
+	
+				gc.stroke(LINK_COLOR);
+				gc.strokeWeight(LINK_THICKNESS);
+				gc.line(0, 0, L1[i], 0);	
+				gc.translate(L1[i], 0);
+			}
+			gc.popMatrix();
+			gc.pushMatrix();
+			for (int i=1; i<theta2.length; i++)
+			{
+				gc.rotate(theta2[i]);
+				
+	
+				gc.stroke(LINK_COLOR);
+				gc.strokeWeight(LINK_THICKNESS);
+				gc.line(0, 0, L2[i], 0);
+			
+	
+				gc.translate(L2[i], 0);
+			}
+			gc.popMatrix();
+			gc.pushMatrix();
+			gc.translate(0, Height);
+			for (int i=1; i<theta3.length; i++)
+			{	
+				gc.rotate(theta3[i]);
+				
+	
+				gc.stroke(LINK_COLOR);
+				gc.strokeWeight(LINK_THICKNESS);
+				gc.line(0, 0, L3[i], 0);
+		
+	
+				gc.translate(L3[i], 0);
+			}
+			gc.popMatrix();
+			gc.pushMatrix();
+			gc.translate(0, Height);
+			for (int i=1; i<theta4.length; i++)
+			{
+				gc.rotate(theta4[i]);
+				
+	
+				gc.stroke(LINK_COLOR);
+				gc.strokeWeight(LINK_THICKNESS);
+				gc.line(0, 0, L4[i], 0);
+		
+	
+				gc.translate(L4[i], 0);
+			}
+			gc.popMatrix();
+		gc.popMatrix();
+
+		
+		//Update their state
+			if (animate_)
+			{
+				update();
+			}
+			frameCount_++;
+		
+			
+		//Increase the speed 
+		speed += .15f;
+	}
+	
+	public void update() {
+
+		int time = millis();
+		if (animate_)
+		{
+			//  update the state of the objects ---> physics
+			float dt = (time - lastUpdateTime_)*0.001f;
+			
+			for (GraphicObject obj: bullets)
+			{
+				obj.update(dt);
+			}
+			
+			for (GraphicObject obj : objectList_)
+			{
+				if (obj instanceof AnimatedObject)
+					obj.update(dt);
+
+			}
+			
+			for (GraphicObject obj : backgroundList_)
+			{
+				if (obj instanceof AnimatedObject)
+					obj.update(dt);
+
+			}
+			for (GraphicObject obj: bullets)
+			{
+				obj.update(dt);
+			}
+		}
+
+		lastUpdateTime_ = time;
+	}
+	
+	
+	public void keyPressed() {
+		
+		if(new_state) {
+			switch (keyCode) {
+			case ' '://Jump
+				startTime_ = millis();
+				state = 3;
+				new_state = false;
+				interpolate();
+				break;
+			case DOWN:
+				startTime_ = millis();
+				state = 4;
+				new_state = false;
+				interpolate();
+				break;
+			}
+		}
+		
+		switch (key) {
+		case 'n':
+			GraphicObject.setBoundingBoxMode(BoundingBoxMode.NO_BOX);
+			break;
+
+		case 'r':
+			GraphicObject.setBoundingBoxMode(BoundingBoxMode.RELATIVE_BOX);
+			break;
+
+		case 'a':
+			GraphicObject.setBoundingBoxMode(BoundingBoxMode.ABSOLUTE_BOX);
+			break;
+
+		case 'f':
+			drawRefFrame_ = !drawRefFrame_;
+			GraphicObject.setDrafReferenceFrame(drawRefFrame_);
+			break;
+		case 'w':
+			if(state != 3)
+				bullets.add(new Bullet(XMIN+200, YMAX-525,0,20,20,0,400,0,0));
+			break;
+		
+		}
+		
+	}
+
+	
+	/**	Converts pixel coordinates into world coordinates
+	 * 
+	 * @param ix	x coordinate of a window pixel
+	 * @param iy	y coordinate of a window pixel
+	 * @return	Corresponding world coordinates stored into a Point2D.Float object
+	 */
+	private Point2D.Float pixelToWorld(int ix, int iy) 
+	{
+		return new Point2D.Float((ix-WORLD_X)*PIXEL_TO_WORLD, -(iy-WORLD_Y)*PIXEL_TO_WORLD);
+	}
+	
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		PApplet.main("v2.dino");
+	}
+}
