@@ -320,6 +320,7 @@ public class dino extends PApplet implements ApplicationConstants {
 				health --;
 				objectList_.remove(i);
 			}
+		}
 			
 			for (int i = 0; i < objectList_.size(); i++) {	
 				//Check hit
@@ -343,7 +344,6 @@ public class dino extends PApplet implements ApplicationConstants {
 				if(backgroundList_.get(i).x_ <= XMIN) { 
 					backgroundList_.remove(i);
 				}
-			}
 			
 			if(random(0,9000) < (40 - objectList_.size()*10)) { 
 				addEllipse(objectList_, imageCircle);
@@ -355,7 +355,7 @@ public class dino extends PApplet implements ApplicationConstants {
 			if(random(0,30000) < (100 - backgroundList_.size()*10)) { 
 				addEllipse(backgroundList_, imageTree);
 			}
-    }
+		}
 			
 			
 			
@@ -432,6 +432,8 @@ public class dino extends PApplet implements ApplicationConstants {
 	 		//Ellipses
 	 		for (GraphicObject obj : objectList_)
 				obj.drawAllQuadrants(gc);
+	 		for (GraphicObject obj : bullets)
+				obj.draw(gc);
 	 		// 	Draw a horizontal line for the "ground"
 	 		gc.translate(0, -200);
 	 		gc.stroke(0);
@@ -647,7 +649,7 @@ public class dino extends PApplet implements ApplicationConstants {
 			GraphicObject.setDrafReferenceFrame(drawRefFrame_);
 			break;
 		case 'w':
-			if(state != 3)
+			if(state != 3 && bullets.size() < 1)
 				bullets.add(new Bullet(XMIN+200, YMAX-525,0,20,20,0,400,0,0));
 			break;
 		
