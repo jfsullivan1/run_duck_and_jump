@@ -203,6 +203,13 @@ public class dino extends PApplet implements ApplicationConstants {
 	private KeyframeInterpolator right_arm_interpolator_;
 	private KeyframeInterpolator left_arm_interpolator_;
 	private int startTime_;
+	
+	private String splashtxt = "RUN, DUCK, AND JUMP!";
+	private boolean splashOn = true;
+	private String splashtxtClick = "CLICK ANYWHERE TO PLAY";
+	private final int titleSize = 64;
+	private final int txtSize = 25;
+	private boolean diedOnce = false;
 
 		
 	public void settings() 
@@ -273,263 +280,280 @@ public class dino extends PApplet implements ApplicationConstants {
 	}
 	
 	public void draw() {
-		
-		PGraphics gc;
-		for (int i = 0; i < objectList_.size(); i++) {
-			//Check bounds
-			if(objectList_.get(i).x_ <= XMIN) { 
-				objectList_.remove(i);
-				score += 1;
+		if(splashOn == true) {
+			clear();
+			textSize(titleSize);
+			color(255, 0, 0);
+			text(splashtxt, 30, 100);
+			textSize(txtSize);
+			text(splashtxtClick, 220, 500);
+			if(diedOnce == true) {
+				text("You died :(", 310, 650);
+				text("Last high score: " + high_score, 270, 750);
 			}
-		}
-		
-		for (int i = 0; i < objectList_.size(); i++) {	
-			//Check hit
-			if(objectList_.get(i).x_ <= XMIN + 200 && objectList_.get(i).x_ > XMIN + 150 && state != 3) { 
-				score -= 1;
-				health --;
-				objectList_.remove(i);
-			}
-		}
-		if(health == 0) {
-			if(score > high_score) { 
-				high_score = score;
-			}
-			setup();
-			
-		}
-		
-		for (int i = 0; i < backgroundList_.size(); i++) {
-			if(backgroundList_.get(i).x_ <= XMIN) { 
-				backgroundList_.remove(i);
-			}
-		}
-		
-		
-		if(random(0,9000) < (40 - objectList_.size()*10)) { 
-			addEllipse(objectList_, imageCircle);
-		}
-		
-		if(random(0,30000) < (100 - backgroundList_.size()*10)) { 
-			addEllipse(backgroundList_, imageCloud);
-		}
-		if(random(0,30000) < (100 - backgroundList_.size()*10)) { 
-			addEllipse(backgroundList_, imageTree);
-		}
-		
-		
-		
-		if (doDoubleBuffer_) 
-		{
-			//	I say that the drawing will take place inside of my off-screen buffer
-			gc = offScreenBuffer_;
-			offScreenBuffer_.beginDraw();
-		}
-		else
-			//	Otherwise, the "graphic context" is that of this PApplet
-			gc = this.g;
-		
-		
-		if (doDoubleBuffer_)
-		{
-			offScreenBuffer_.endDraw();
-			image(offScreenBuffer_, 0, 0);				
-
-			
-			lastBuffer_.beginDraw();
-			lastBuffer_.image(offScreenBuffer_, 0, 0);
-			lastBuffer_.endDraw();
-
-			int []pixelLB = lastBuffer_.pixels;
-			int []pixelOSB = offScreenBuffer_.pixels;
-			//int nbPixels = width*height;
-			//	Copy pixel info last buffer
-			for (int i=0, k=height-1; i<height; i++,k--)
-				for (int j=0; j<width; j++)
-					pixelLB[k*width + j] = pixelOSB[i*width + j];
-			
-			lastBuffer_.updatePixels();
-		}
-		gc.background(50, 50, 255);
-		gc.fill(0,0,0);
-		gc.noStroke();
-		
-		if (drawRefFrame_)
-			GraphicObject.drawReferenceFrame(gc);
-		
-		gc.translate(WORLD_X, WORLD_Y);
- 		
- 		//	change to world units
- 		gc.scale(DRAW_IN_WORLD_UNITS_SCALE, -DRAW_IN_WORLD_UNITS_SCALE);	
- 		
- 		//Background Objects
- 		for (GraphicObject obj : backgroundList_)
-			obj.drawAllQuadrants(gc);
- 		
- 		//Score 
- 		pushMatrix();
- 		
- 		scale(-1, 1);
- 		rotate(PI);
- 		scale(5);
- 		translate(-80, -80);
- 		gc.text(score, 10, 10);
- 		
- 		pushMatrix();
- 		scale(.4f);
- 		gc.translate(-10, 60);
- 		gc.text("High Score:"+high_score, 10, 10);
- 		popMatrix();
- 		
- 		//Health 
- 		gc.scale(.08f, .08f);
- 		for(int i = 0; i < health; i++) { 
- 			gc.image(imageHeart,(150*i), 150);
- 		}
- 		popMatrix();
- 		
- 		//Ellipses
- 		for (GraphicObject obj : objectList_)
-			obj.drawAllQuadrants(gc);
- 		// 	Draw a horizontal line for the "ground"
- 		gc.translate(0, -200);
- 		gc.stroke(0);
- 		gc.line(XMIN, 0, XMAX, 0);
- 		gc.fill(50, 200, 50);
- 		gc.rect(XMIN, 0, 2*XMAX, -200);
- 		gc.pushMatrix();
- 		g.translate(-200, 0);
-		int currentTime = millis();
-		
-		float t = startTime_ != 0 ? (currentTime - startTime_)*0.001f : 0;
-		//Set for global here for other functions to be on the same "time"
-		global_t = t;
-		
-		//	get current interpolated state for walking right (right leg)
- 		float []theta1 = right_leg_interpolator_.computeStateVector(t);
- 		
- 		//  get current interpolated state for walking right (left leg)
- 	 	float []theta2 = left_leg_interpolator_.computeStateVector(t);
- 	 	
- 	 	// 	get current interpolated state for walking right (right arm)
- 	 	float []theta3 = right_arm_interpolator_.computeStateVector(t);
- 	 		
- 	 	//  get current interpolated state for walking right (left arm)
- 	 	float []theta4 = left_arm_interpolator_.computeStateVector(t);
- 		
- 	 	
- 	 	
-		if(state == 3 && t <= (.4f*modifier)) { 
-			movement_v += 6;
-		}else if(state == 3 && t <= (.8f*modifier)) { 
-			movement_v -= 6;
-		}
-		
-		
-
-		if(t > (.8f*modifier) || (t == 0 && state == 0) ) { 
-			movement_v = 0;
-			state = 0;
-			interpolate();
-			startTime_ = millis();
-			new_state = true;
-		}
-		
-		gc.translate(0, movement_v);
-		if(state != 4) {
-			gc.stroke(LINK_COLOR);
-			gc.strokeWeight(1);
-			gc.fill(LINK_COLOR);
-			gc.ellipse(0, Height+Torso_bottom+15, Height/3, Height/3);
-			gc.stroke(LINK_COLOR);
-			gc.strokeWeight(LINK_THICKNESS);
-			gc.line(0, Torso_bottom, 0, Height+Torso_bottom);
-			gc.noStroke();
-			gc.translate(0, Torso_bottom);
 		}
 		else
 		{
-			gc.stroke(LINK_COLOR);
-			gc.strokeWeight(1);
-			gc.fill(LINK_COLOR);
-			gc.ellipse(-13, 9, Height/3, Height/3);
-			gc.stroke(LINK_COLOR);
-			gc.strokeWeight(LINK_THICKNESS);
-			gc.line(0, 8, Height, 4);
+			PGraphics gc;
+			for (int i = 0; i < objectList_.size(); i++) {
+				//Check bounds
+				if(objectList_.get(i).x_ <= XMIN) { 
+					objectList_.remove(i);
+					score += 1;
+				}
+			}
+			
+			for (int i = 0; i < objectList_.size(); i++) {	
+				//Check hit
+				if(objectList_.get(i).x_ <= XMIN + 200 && objectList_.get(i).x_ > XMIN + 150 && state != 3) { 
+					score -= 1;
+					health --;
+					objectList_.remove(i);
+				}
+			}
+			if(health == 0) {
+				if(score > high_score) { 
+					high_score = score;
+				}
+				splashOn = true;
+				diedOnce = true;
+				setup();
+				
+			}
+			
+			for (int i = 0; i < backgroundList_.size(); i++) {
+				if(backgroundList_.get(i).x_ <= XMIN) { 
+					backgroundList_.remove(i);
+				}
+			}
+			
+			
+			if(random(0,9000) < (40 - objectList_.size()*10)) { 
+				addEllipse(objectList_, imageCircle);
+			}
+			
+			if(random(0,30000) < (100 - backgroundList_.size()*10)) { 
+				addEllipse(backgroundList_, imageCloud);
+			}
+			if(random(0,30000) < (100 - backgroundList_.size()*10)) { 
+				addEllipse(backgroundList_, imageTree);
+			}
+			
+			
+			
+			if (doDoubleBuffer_) 
+			{
+				//	I say that the drawing will take place inside of my off-screen buffer
+				gc = offScreenBuffer_;
+				offScreenBuffer_.beginDraw();
+			}
+			else
+				//	Otherwise, the "graphic context" is that of this PApplet
+				gc = this.g;
+			
+			
+			if (doDoubleBuffer_)
+			{
+				offScreenBuffer_.endDraw();
+				image(offScreenBuffer_, 0, 0);				
+	
+				
+				lastBuffer_.beginDraw();
+				lastBuffer_.image(offScreenBuffer_, 0, 0);
+				lastBuffer_.endDraw();
+	
+				int []pixelLB = lastBuffer_.pixels;
+				int []pixelOSB = offScreenBuffer_.pixels;
+				//int nbPixels = width*height;
+				//	Copy pixel info last buffer
+				for (int i=0, k=height-1; i<height; i++,k--)
+					for (int j=0; j<width; j++)
+						pixelLB[k*width + j] = pixelOSB[i*width + j];
+				
+				lastBuffer_.updatePixels();
+			}
+			gc.background(50, 50, 255);
+			gc.fill(0,0,0);
 			gc.noStroke();
-			gc.translate(0, Torso_bottom);
+			
+			if (drawRefFrame_)
+				GraphicObject.drawReferenceFrame(gc);
+			
+			gc.translate(WORLD_X, WORLD_Y);
+	 		
+	 		//	change to world units
+	 		gc.scale(DRAW_IN_WORLD_UNITS_SCALE, -DRAW_IN_WORLD_UNITS_SCALE);	
+	 		
+	 		//Background Objects
+	 		for (GraphicObject obj : backgroundList_)
+				obj.drawAllQuadrants(gc);
+	 		
+	 		//Score 
+	 		pushMatrix();
+	 		
+	 		scale(-1, 1);
+	 		rotate(PI);
+	 		scale(5);
+	 		translate(-80, -80);
+	 		textSize(20);
+	 		gc.text(score, 10, 10);
+	 		
+	 		pushMatrix();
+	 		scale(.4f);
+	 		gc.translate(-10, 60);
+	 		gc.text("High Score:"+high_score, 10, 10);
+	 		popMatrix();
+	 		
+	 		//Health 
+	 		gc.scale(.08f, .08f);
+	 		for(int i = 0; i < health; i++) { 
+	 			gc.image(imageHeart,(150*i), 150);
+	 		}
+	 		popMatrix();
+	 		
+	 		//Ellipses
+	 		for (GraphicObject obj : objectList_)
+				obj.drawAllQuadrants(gc);
+	 		// 	Draw a horizontal line for the "ground"
+	 		gc.translate(0, -200);
+	 		gc.stroke(0);
+	 		gc.line(XMIN, 0, XMAX, 0);
+	 		gc.fill(50, 200, 50);
+	 		gc.rect(XMIN, 0, 2*XMAX, -200);
+	 		gc.pushMatrix();
+	 		g.translate(-200, 0);
+			int currentTime = millis();
+			
+			float t = startTime_ != 0 ? (currentTime - startTime_)*0.001f : 0;
+			//Set for global here for other functions to be on the same "time"
+			global_t = t;
+			
+			//	get current interpolated state for walking right (right leg)
+	 		float []theta1 = right_leg_interpolator_.computeStateVector(t);
+	 		
+	 		//  get current interpolated state for walking right (left leg)
+	 	 	float []theta2 = left_leg_interpolator_.computeStateVector(t);
+	 	 	
+	 	 	// 	get current interpolated state for walking right (right arm)
+	 	 	float []theta3 = right_arm_interpolator_.computeStateVector(t);
+	 	 		
+	 	 	//  get current interpolated state for walking right (left arm)
+	 	 	float []theta4 = left_arm_interpolator_.computeStateVector(t);
+	 		
+	 	 	
+	 	 	
+			if(state == 3 && t <= (.4f*modifier)) { 
+				movement_v += 6;
+			}else if(state == 3 && t <= (.8f*modifier)) { 
+				movement_v -= 6;
+			}
+			
+			
+	
+			if(t > (.8f*modifier) || (t == 0 && state == 0) ) { 
+				movement_v = 0;
+				state = 0;
+				interpolate();
+				startTime_ = millis();
+				new_state = true;
+			}
+			
+			gc.translate(0, movement_v);
+			if(state != 4) {
+				gc.stroke(LINK_COLOR);
+				gc.strokeWeight(1);
+				gc.fill(LINK_COLOR);
+				gc.ellipse(0, Height+Torso_bottom+15, Height/3, Height/3);
+				gc.stroke(LINK_COLOR);
+				gc.strokeWeight(LINK_THICKNESS);
+				gc.line(0, Torso_bottom, 0, Height+Torso_bottom);
+				gc.noStroke();
+				gc.translate(0, Torso_bottom);
+			}
+			else
+			{
+				gc.stroke(LINK_COLOR);
+				gc.strokeWeight(1);
+				gc.fill(LINK_COLOR);
+				gc.ellipse(-13, 9, Height/3, Height/3);
+				gc.stroke(LINK_COLOR);
+				gc.strokeWeight(LINK_THICKNESS);
+				gc.line(0, 8, Height, 4);
+				gc.noStroke();
+				gc.translate(0, Torso_bottom);
+			}
+			
+	
+				gc.pushMatrix();
+				for (int i=1; i<theta1.length; i++)
+				{
+					gc.rotate(theta1[i]);
+					
+		
+					gc.stroke(LINK_COLOR);
+					gc.strokeWeight(LINK_THICKNESS);
+					gc.line(0, 0, L1[i], 0);	
+					gc.translate(L1[i], 0);
+				}
+				gc.popMatrix();
+				gc.pushMatrix();
+				for (int i=1; i<theta2.length; i++)
+				{
+					gc.rotate(theta2[i]);
+					
+		
+					gc.stroke(LINK_COLOR);
+					gc.strokeWeight(LINK_THICKNESS);
+					gc.line(0, 0, L2[i], 0);
+				
+		
+					gc.translate(L2[i], 0);
+				}
+				gc.popMatrix();
+				gc.pushMatrix();
+				gc.translate(0, Height);
+				for (int i=1; i<theta3.length; i++)
+				{	
+					gc.rotate(theta3[i]);
+					
+		
+					gc.stroke(LINK_COLOR);
+					gc.strokeWeight(LINK_THICKNESS);
+					gc.line(0, 0, L3[i], 0);
+			
+		
+					gc.translate(L3[i], 0);
+				}
+				gc.popMatrix();
+				gc.pushMatrix();
+				gc.translate(0, Height);
+				for (int i=1; i<theta4.length; i++)
+				{
+					gc.rotate(theta4[i]);
+					
+		
+					gc.stroke(LINK_COLOR);
+					gc.strokeWeight(LINK_THICKNESS);
+					gc.line(0, 0, L4[i], 0);
+			
+		
+					gc.translate(L4[i], 0);
+				}
+				gc.popMatrix();
+			gc.popMatrix();
+	
+			
+			//Update their state
+				if (animate_)
+				{
+					update();
+				}
+				frameCount_++;
+			
+				
+			//Increase the speed 
+			speed += .15f;
 		}
-		
-
-			gc.pushMatrix();
-			for (int i=1; i<theta1.length; i++)
-			{
-				gc.rotate(theta1[i]);
-				
-	
-				gc.stroke(LINK_COLOR);
-				gc.strokeWeight(LINK_THICKNESS);
-				gc.line(0, 0, L1[i], 0);	
-				gc.translate(L1[i], 0);
-			}
-			gc.popMatrix();
-			gc.pushMatrix();
-			for (int i=1; i<theta2.length; i++)
-			{
-				gc.rotate(theta2[i]);
-				
-	
-				gc.stroke(LINK_COLOR);
-				gc.strokeWeight(LINK_THICKNESS);
-				gc.line(0, 0, L2[i], 0);
-			
-	
-				gc.translate(L2[i], 0);
-			}
-			gc.popMatrix();
-			gc.pushMatrix();
-			gc.translate(0, Height);
-			for (int i=1; i<theta3.length; i++)
-			{	
-				gc.rotate(theta3[i]);
-				
-	
-				gc.stroke(LINK_COLOR);
-				gc.strokeWeight(LINK_THICKNESS);
-				gc.line(0, 0, L3[i], 0);
-		
-	
-				gc.translate(L3[i], 0);
-			}
-			gc.popMatrix();
-			gc.pushMatrix();
-			gc.translate(0, Height);
-			for (int i=1; i<theta4.length; i++)
-			{
-				gc.rotate(theta4[i]);
-				
-	
-				gc.stroke(LINK_COLOR);
-				gc.strokeWeight(LINK_THICKNESS);
-				gc.line(0, 0, L4[i], 0);
-		
-	
-				gc.translate(L4[i], 0);
-			}
-			gc.popMatrix();
-		gc.popMatrix();
-
-		
-		//Update their state
-			if (animate_)
-			{
-				update();
-			}
-			frameCount_++;
-		
-			
-		//Increase the speed 
-		speed += .15f;
 	}
 	
 	public void update() {
@@ -600,6 +624,11 @@ public class dino extends PApplet implements ApplicationConstants {
 		
 	}
 
+	public void mousePressed() {
+		if(splashOn == true) {
+			splashOn = false;
+		}
+	}
 	
 	/**	Converts pixel coordinates into world coordinates
 	 * 
