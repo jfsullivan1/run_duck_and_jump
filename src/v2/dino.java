@@ -103,6 +103,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	private float[] L2 = {-10000, 25f, 25f};//Left leg
 	private float[] L3 = {-10000, 20f, 20f};//Right Arm
 	private float[] L4 = {-10000, 20f, 20f};//Left Arm
+	private float[] L5 = {-10000, 30f, 15f};//torso
 	
 	//-----------------------------
 	//	animation mode
@@ -132,6 +133,20 @@ public class dino extends PApplet implements ApplicationConstants {
 	//	Health
 	//-----------------------------
 	private int health = 3;
+	
+	//----------------------Torso----------------------------------------------
+	
+
+	private float [][]keyFrames_torso_default = {
+									{-10000, -1.57f, 0, 0}};
+	private float [][]keyFrames_torso_ducking = {
+									{-10000, -1.57f, 0, 0}, // start 
+									{-10000, -1.57f, -0.3f, (0.1f*modifier)},
+									{-10000, -1.57f, -0.5f, (0.2f*modifier)},
+									{-10000, -1.57f, -0.7f, (0.3f*modifier)},//bottom of duck
+									{-10000, -1.57f, -0.5f, (0.4f*modifier)},
+									{-10000, -1.57f, -0.3f, (0.5f*modifier)},
+									{-10000, -1.57f, 0, (0.4f*modifier)}}; // start
 	
 	//--------------------Right-Leg--------------------------------------------
 	
@@ -205,6 +220,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	private KeyframeInterpolator left_leg_interpolator_;
 	private KeyframeInterpolator right_arm_interpolator_;
 	private KeyframeInterpolator left_arm_interpolator_;
+	private KeyframeInterpolator torso_interpolator_;
 	private int startTime_;
 	
 	private String splashtxt = "RUN, DUCK, AND JUMP!";
@@ -229,17 +245,20 @@ public class dino extends PApplet implements ApplicationConstants {
 			left_leg_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftleg_walkright);
 			right_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_rightarm_jump);
 			left_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftarm_jump);
+			torso_interpolator_ = new LinearKeyframeInterpolator(keyFrames_torso_default);
 		}else if(state == 4){
-			right_leg_interpolator_ = new LinearKeyframeInterpolator(keyFrames_rightleg_sliding);
-			left_leg_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftleg_sliding);
-			right_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_rightarm_sliding);
-			left_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftarm_sliding);
+//			right_leg_interpolator_ = new LinearKeyframeInterpolator(keyFrames_rightleg_sliding);
+//			left_leg_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftleg_sliding);
+//			right_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_rightarm_sliding);
+//			left_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftarm_sliding);
+			torso_interpolator_ = new LinearKeyframeInterpolator(keyFrames_torso_ducking);
 		}
 		else{//Default walk
 			right_leg_interpolator_ = new LinearKeyframeInterpolator(keyFrames_rightleg_walkright);
 			left_leg_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftleg_walkright);
 			right_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_rightarm_default);
 			left_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftarm_default);
+			torso_interpolator_ = new LinearKeyframeInterpolator(keyFrames_torso_default);
 		}
 	}
 	
@@ -480,6 +499,9 @@ public class dino extends PApplet implements ApplicationConstants {
 	 	 		
 	 	 	//  get current interpolated state for walking right (left arm)
 	 	 	float []theta4 = left_arm_interpolator_.computeStateVector(t);
+	 	 	
+	 	 	// get current interpolated state for torso
+	 	 	float []theta5 = torso_interpolator_.computeStateVector(t);
 	 		
 	 	 	
 	 	 	
@@ -500,96 +522,98 @@ public class dino extends PApplet implements ApplicationConstants {
 			}
 			
 			gc.translate(0, movement_v);
-			if(state != 4) {
-				gc.stroke(LINK_COLOR);
-				gc.strokeWeight(1);
-				gc.fill(LINK_COLOR);
-				gc.ellipse(0, Height+Torso_bottom+15, Height/3, Height/3);
-				gc.stroke(LINK_COLOR);
-				gc.strokeWeight(LINK_THICKNESS);
-				gc.line(0, Torso_bottom, 0, Height+Torso_bottom);
-				gc.noStroke();
-				gc.translate(0, Torso_bottom);
-			}
-			else
+			gc.stroke(LINK_COLOR);
+			gc.strokeWeight(1);
+			gc.fill(LINK_COLOR);
+			gc.ellipse(0, Height+Torso_bottom+15, Height/3, Height/3);
+			gc.stroke(LINK_COLOR);
+			gc.strokeWeight(LINK_THICKNESS);
+			//gc.line(0, Torso_bottom, 0, Height+Torso_bottom);
+			//gc.noStroke();
+			gc.translate(0, Torso_bottom);
+
+
+			gc.pushMatrix();
+			for (int i=1; i<theta1.length; i++)
 			{
-				gc.stroke(LINK_COLOR);
-				gc.strokeWeight(1);
-				gc.fill(LINK_COLOR);
-				gc.ellipse(-13, 9, Height/3, Height/3);
+				gc.rotate(theta1[i]);
+				
+	
 				gc.stroke(LINK_COLOR);
 				gc.strokeWeight(LINK_THICKNESS);
-				gc.line(0, 8, Height, 4);
-				gc.noStroke();
-				gc.translate(0, Torso_bottom);
+				gc.line(0, 0, L1[i], 0);	
+				gc.translate(L1[i], 0);
 			}
+			gc.popMatrix();
+			gc.pushMatrix();
+			for (int i=1; i<theta2.length; i++)
+			{
+				gc.rotate(theta2[i]);
+				
+	
+				gc.stroke(LINK_COLOR);
+				gc.strokeWeight(LINK_THICKNESS);
+				gc.line(0, 0, L2[i], 0);
 			
 	
-				gc.pushMatrix();
-				for (int i=1; i<theta1.length; i++)
-				{
-					gc.rotate(theta1[i]);
-					
-		
-					gc.stroke(LINK_COLOR);
-					gc.strokeWeight(LINK_THICKNESS);
-					gc.line(0, 0, L1[i], 0);	
-					gc.translate(L1[i], 0);
-				}
-				gc.popMatrix();
-				gc.pushMatrix();
-				for (int i=1; i<theta2.length; i++)
-				{
-					gc.rotate(theta2[i]);
-					
-		
-					gc.stroke(LINK_COLOR);
-					gc.strokeWeight(LINK_THICKNESS);
-					gc.line(0, 0, L2[i], 0);
-				
-		
-					gc.translate(L2[i], 0);
-				}
-				gc.popMatrix();
-				gc.pushMatrix();
-				gc.translate(0, Height);
-				for (int i=1; i<theta3.length; i++)
-				{	
-					gc.rotate(theta3[i]);
-					
-		
-					gc.stroke(LINK_COLOR);
-					gc.strokeWeight(LINK_THICKNESS);
-					gc.line(0, 0, L3[i], 0);
-			
-		
-					gc.translate(L3[i], 0);
-				}
-				gc.popMatrix();
-				gc.pushMatrix();
-				gc.translate(0, Height);
-				for (int i=1; i<theta4.length; i++)
-				{
-					gc.rotate(theta4[i]);
-					
-		
-					gc.stroke(LINK_COLOR);
-					gc.strokeWeight(LINK_THICKNESS);
-					gc.line(0, 0, L4[i], 0);
-			
-		
-					gc.translate(L4[i], 0);
-				}
-				gc.popMatrix();
+				gc.translate(L2[i], 0);
+			}
 			gc.popMatrix();
+			gc.pushMatrix();
+			gc.translate(0, Height);
+			for (int i=1; i<theta3.length; i++)
+			{	
+				gc.rotate(theta3[i]);
+				
+	
+				gc.stroke(LINK_COLOR);
+				gc.strokeWeight(LINK_THICKNESS);
+				gc.line(0, 0, L3[i], 0);
+		
+	
+				gc.translate(L3[i], 0);
+			}
+			gc.popMatrix();
+			gc.pushMatrix();
+			gc.translate(0, Height);
+			for (int i=1; i<theta4.length; i++)
+			{
+				gc.rotate(theta4[i]);
+				
+	
+				gc.stroke(LINK_COLOR);
+				gc.strokeWeight(LINK_THICKNESS);
+				gc.line(0, 0, L4[i], 0);
+		
+	
+				gc.translate(L4[i], 0);
+			}
+			gc.popMatrix();
+			gc.pushMatrix();
+			gc.translate(0, Height/14);
+			for (int i=1; i<theta5.length; i++)
+			{
+				gc.rotate(theta5[i]*3);
+				
+	
+				gc.stroke(LINK_COLOR);
+				gc.strokeWeight(LINK_THICKNESS);
+				gc.line(L5[i], 0, 0, 0);
+		
+	
+				gc.translate(L5[i], 0);
+			}
+			gc.popMatrix();
+			gc.popMatrix();
+			
 	
 			
 			//Update their state
-				if (animate_)
-				{
-					update();
-				}
-				frameCount_++;
+			if (animate_)
+			{
+				update();
+			}
+			frameCount_++;
 			
 				
 			//Increase the speed 
