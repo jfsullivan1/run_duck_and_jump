@@ -123,6 +123,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	PImage imageTree;
 	PImage imageHeart;
 	PImage imageWood;
+	PImage angryGuy;
 	
 	//-----------------------------
 	//	Modifies the time interval of the jump, (lower = longer)
@@ -132,7 +133,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	//-----------------------------
 	//	Health
 	//-----------------------------
-	private int health = 3;
+	private int health = 300;
 	
 	//----------------------Torso----------------------------------------------
 	
@@ -230,6 +231,8 @@ public class dino extends PApplet implements ApplicationConstants {
 	private final int txtSize = 25;
 	private boolean diedOnce = false;
 	private int headX = 0;
+	private int time;
+	private int entityTime;
 
 	//Sound files
 	SoundFile die;
@@ -280,6 +283,8 @@ public class dino extends PApplet implements ApplicationConstants {
 		imageTree = loadImage("data/tree.png");
 		imageHeart = loadImage("data/heart.png");
 		imageWood = loadImage("data/wood.png");
+		angryGuy = loadImage("data/lil_angry_guy.png");
+
 		//Sound files
 		die = new SoundFile(this, "data/death.wav");
 		jump = new SoundFile(this, "data/jump.wav");
@@ -308,8 +313,11 @@ public class dino extends PApplet implements ApplicationConstants {
 			objectList.add(new AnimatedEllipse(XMAX, YMIN+160, 3.1415f, 100, 200, LINK_COLOR, random(-50, -500)-speed, 0, 0, image));
 		}else if(image == imageWood) {
 			objectList.add(new AnimatedBox(XMAX,YMIN+15,0,100,600,image,-300-speed,0,0));
-		}else {
+		}else if(image == imageCircle) {
 			objectList.add(new AnimatedEllipse(XMAX, YMIN+15, 0, 60, 60, LINK_COLOR, -300-speed, 0, 0, image));
+		}
+		else {
+			objectList_.add(new AnimatedEllipse(XMAX,YMIN+160,PI,100,100,LINK_COLOR,-300-speed,0,0,image));
 		}
 	}
 	
@@ -358,6 +366,7 @@ public class dino extends PApplet implements ApplicationConstants {
 		}
     else
 		{
+    	time = millis();
 			PGraphics gc;
 			for (int i = 0; i < objectList_.size(); i++) {
 				//Check bounds
@@ -382,11 +391,16 @@ public class dino extends PApplet implements ApplicationConstants {
 					health--;
 					objectList_.remove(i);
 				}
-			} else if (objectList_.get(i).x_ <= XMIN + 220 && objectList_.get(i).x_ > XMIN + 150) {
+			} else if(objectList_.get(i).x_ <= XMIN + 220 && objectList_.get(i).x_ > XMIN + 150 && objectList_.get(i).y_ ==YMIN +15) {
 				if(YMAX-550 + movement_v < objectList_.get(i).y_ + 75) {
 					health--;
 					objectList_.remove(i);
 				}
+			}
+			else if (objectList_.get(i).x_ <= XMIN + 220 && objectList_.get(i).x_ > XMIN + 150 && state != 4)
+			{
+				health--;
+				objectList_.remove(i);
 			}
 		}
 			if(health == 0) {
@@ -406,11 +420,19 @@ public class dino extends PApplet implements ApplicationConstants {
 				}
 			}
 			
-			if(random(0,10000) < 100 && objectList_.size() < 3) { 
+
+			if(random(0,4000) < 100 && objectList_.size() < 3 && (time - entityTime > 300)) { 
 				addEllipse(objectList_, imageCircle);
+				entityTime = millis();
 			}
-			else if(random(0,20000) < 100 && objectList_.size() < 5) { 
+			else if(random(0,4000) < 100 && objectList_.size() < 5 && (time - entityTime > 300)) { 
 				addEllipse(objectList_, imageWood);
+				entityTime=millis();
+			}
+			else if(random(0,8000) < 100 && objectList_.size() < 5 && (time - entityTime > 500))
+			{
+				addEllipse(objectList_,angryGuy);
+				entityTime = millis();
 			}
 			
 			if(random(0,10000) < 100 && backgroundList_.size() < 3) { 
@@ -750,8 +772,8 @@ public class dino extends PApplet implements ApplicationConstants {
 			break;
 		case ' ':
 			if(bullets.size() < 1)
-				bullets.add(new Bullet(XMIN+200, YMAX-525 + movement_v,0,20,20,0,400,0,0));
-			fireball.play();
+				bullets.add(new Bullet(XMIN+200, YMAX-525 + movement_v,0,20,20,0xFFff0000,400,0,0));
+				fireball.play();
 			break;
 		case 's':
 			if(new_state) {
@@ -768,7 +790,7 @@ public class dino extends PApplet implements ApplicationConstants {
 				new_state = false;
 				jump.play();
 				interpolate();
-			}
+
 			break;
 		
 		}
