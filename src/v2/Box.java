@@ -206,11 +206,13 @@ public class Box extends GraphicObject
 		float testX = cx;
 		float testY = cy;
 		
+		// Find the closest edge to the fireball
 		if (cx < x_) testX = x_;
 		else if (cx> x_+width_) testX = x_+width_;
 		if(cy<y_) testY = y_;
 		else if(cy>y_+height_) testY = y_+height_;
 		
+		// get the distance from the closest edge to the fireball
 		float distX = cx-testX;
 		float distY = cy-testY;
 		float distance = (float) Math.sqrt( (distX*distX) + (distY*distY) );

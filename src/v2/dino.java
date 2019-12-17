@@ -25,7 +25,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	//-----------------------------
 	ArrayList<GraphicObject> backgroundList_;
 	
-	ArrayList<GraphicObject> bullets;
+	ArrayList<GraphicObject> fireballs;
 	
 	/**	Previous value of the off-screen buffer (after the last call to draw()
 	 */
@@ -299,7 +299,7 @@ public class dino extends PApplet implements ApplicationConstants {
 		
 		objectList_ = new ArrayList<GraphicObject>();
 		backgroundList_ = new ArrayList<GraphicObject>();
-		bullets = new ArrayList<GraphicObject>();
+		fireballs = new ArrayList<GraphicObject>();
 		offScreenBuffer_ = createGraphics(width, height);
 		GraphicObject.setAnimationMode(animationMode_);
 		addEllipse(backgroundList_, imageCloud);
@@ -376,10 +376,10 @@ public class dino extends PApplet implements ApplicationConstants {
       }
 
 		
-		for (int i = 0; i < bullets.size(); i++) {
+		for (int i = 0; i < fireballs.size(); i++) {
 			//Check bounds
-			if(bullets.get(i).x_ >= XMAX) { 
-				bullets.remove(i);
+			if(fireballs.get(i).x_ >= XMAX) { 
+				fireballs.remove(i);
 			}
 		}
 		
@@ -420,7 +420,7 @@ public class dino extends PApplet implements ApplicationConstants {
 			}
 			
 
-			if(random(0,4000) < 100 && objectList_.size() < 3 && (time - entityTime > 300)) { 
+			if(random(0,4000) < 100 && objectList_.size() < 3 && (time - entityTime > 450)) { 
 				addEllipse(objectList_, imageCircle);
 				entityTime = millis();
 			}
@@ -428,7 +428,7 @@ public class dino extends PApplet implements ApplicationConstants {
 				addEllipse(objectList_, imageWood);
 				entityTime=millis();
 			}
-			else if(random(0,8000) < 100 && objectList_.size() < 5 && (time - entityTime > 500))
+			else if(random(0,8000) < 100 && objectList_.size() < 5 && (time - entityTime > 800))
 			{
 				addEllipse(objectList_,angryGuy);
 				entityTime = millis();
@@ -518,14 +518,14 @@ public class dino extends PApplet implements ApplicationConstants {
 	 		{
 	 			if (obj instanceof AnimatedBox)
 	 			{
-	 				for (GraphicObject obj2 : bullets)
+	 				for (GraphicObject obj2 : fireballs)
 	 				{
 	 					if ( ((AnimatedBox) obj).isHit(obj2.x_, obj2.y_, obj2.height_/2))
 	 					{
 	 						//System.out.println(obj2.x_);
 	 						//System.out.println(obj.x_);
 	 						objectList_.remove(obj);
-	 						bullets.remove(obj2);
+	 						fireballs.remove(obj2);
 	 						score+=1;
 	 						break outerloop;
 	 					}
@@ -535,7 +535,7 @@ public class dino extends PApplet implements ApplicationConstants {
 				obj.drawAllQuadrants(gc);
 	 		}
 
-	 		for (GraphicObject obj : bullets)
+	 		for (GraphicObject obj : fireballs)
 				obj.draw(gc);
 	 		// 	Draw a horizontal line for the "ground"
 	 		gc.translate(0, -200);
@@ -722,7 +722,7 @@ public class dino extends PApplet implements ApplicationConstants {
 			//  update the state of the objects ---> physics
 			float dt = (time - lastUpdateTime_)*0.001f;
 			
-			for (GraphicObject obj: bullets)
+			for (GraphicObject obj: fireballs)
 			{
 				obj.update(dt);
 			}
@@ -740,7 +740,7 @@ public class dino extends PApplet implements ApplicationConstants {
 					obj.update(dt);
 
 			}
-			for (GraphicObject obj: bullets)
+			for (GraphicObject obj: fireballs)
 			{
 				obj.update(dt);
 			}
@@ -788,9 +788,9 @@ public class dino extends PApplet implements ApplicationConstants {
 			GraphicObject.setDrafReferenceFrame(drawRefFrame_);
 			break;
 		case 'w':
-			if(bullets.size() < 1)
+			if(fireballs.size() < 1)
 			{
-				bullets.add(new Bullet(XMIN+200, YMAX-525 + movement_v,0,20,20,0xFFff0000,400,0,0));
+				fireballs.add(new Fireball(XMIN+200, YMAX-525 + movement_v,0,20,20,0xFFff0000,400,0,0));
 				fireball.play();
 			}
 			break;
