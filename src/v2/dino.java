@@ -2,7 +2,7 @@ package v2;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
-
+import processing.sound.*;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PImage;
@@ -231,6 +231,10 @@ public class dino extends PApplet implements ApplicationConstants {
 	private boolean diedOnce = false;
 	private int headX = 0;
 
+	//Sound files
+	SoundFile die;
+	SoundFile jump;
+	SoundFile fireball;
 		
 	public void settings() 
 	{
@@ -269,13 +273,17 @@ public class dino extends PApplet implements ApplicationConstants {
 		health = 3;
 		score = 0;
 		speed = 0;
+		
 		interpolate();
 		imageCircle = loadImage("data/thorn.png");
 		imageCloud = loadImage("data/cloud.png");
 		imageTree = loadImage("data/tree.png");
 		imageHeart = loadImage("data/heart.png");
 		imageWood = loadImage("data/wood.png");
-		
+		//Sound files
+		die = new SoundFile(this, "death.wav");
+		jump = new SoundFile(this, "jump.wav");
+		fireball = new SoundFile(this, "fireball.wav");
 		//-----------------------------
 		//	add random amount of ellipses
 		//-----------------------------
@@ -386,6 +394,7 @@ public class dino extends PApplet implements ApplicationConstants {
 				}
 				splashOn = true;
 				diedOnce = true;
+				die.play();
 				setup();
 				
 			}
@@ -727,6 +736,7 @@ public class dino extends PApplet implements ApplicationConstants {
 				startTime_ = millis();
 				state = 3;
 				new_state = false;
+				jump.play();
 				interpolate();
 				break;
 			case DOWN:
@@ -758,6 +768,7 @@ public class dino extends PApplet implements ApplicationConstants {
 		case 'w':
 			if(bullets.size() < 1)
 				bullets.add(new Bullet(XMIN+200, YMAX-525 + movement_v,0,20,20,0,400,0,0));
+				fireball.play();
 			break;
 		
 		}
