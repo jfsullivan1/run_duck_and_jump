@@ -25,6 +25,8 @@ public class dino extends PApplet implements ApplicationConstants {
 	//-----------------------------
 	ArrayList<GraphicObject> backgroundList_;
 	
+	ArrayList<GraphicObject> bullets;
+	
 	/**	Previous value of the off-screen buffer (after the last call to draw()
 	 */
 	private PGraphics lastBuffer_;
@@ -41,7 +43,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	/**	Ratio of animation frames over rendering frames 
 	 * 
 	 */
-	static final int ANIMATION_RENDERING_FRAME_RATIO = 5;
+	static final int ANIMATION_RENDERING_FRAME_RATIO = 1;
 	
 	/**	computed animation frame rate
 	 * 
@@ -101,6 +103,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	private float[] L2 = {-10000, 25f, 25f};//Left leg
 	private float[] L3 = {-10000, 20f, 20f};//Right Arm
 	private float[] L4 = {-10000, 20f, 20f};//Left Arm
+	private float[] L5 = {-10000, 30f, 15f};//torso
 	
 	//-----------------------------
 	//	animation mode
@@ -119,6 +122,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	PImage imageCloud;
 	PImage imageTree;
 	PImage imageHeart;
+	PImage imageWood;
 	
 	//-----------------------------
 	//	Modifies the time interval of the jump, (lower = longer)
@@ -129,6 +133,20 @@ public class dino extends PApplet implements ApplicationConstants {
 	//	Health
 	//-----------------------------
 	private int health = 3;
+	
+	//----------------------Torso----------------------------------------------
+	
+
+	private float [][]keyFrames_torso_default = {
+									{-10000, -1.57f, 0, 0}};
+	private float [][]keyFrames_torso_ducking = {
+									{-10000, -1.57f, 0, 0}, // start 
+									{-10000, -1.57f, -0.3f, (0.1f*modifier)},
+									{-10000, -1.57f, -0.5f, (0.2f*modifier)},
+									{-10000, -1.57f, -0.7f, (0.3f*modifier)}};//bottom of duck
+//									{-10000, -1.57f, -0.5f, (0.4f*modifier)},
+//									{-10000, -1.57f, -0.3f, (0.5f*modifier)},
+//									{-10000, -1.57f, 0, (0.4f*modifier)}}; // start
 	
 	//--------------------Right-Leg--------------------------------------------
 	
@@ -202,11 +220,12 @@ public class dino extends PApplet implements ApplicationConstants {
 	private KeyframeInterpolator left_leg_interpolator_;
 	private KeyframeInterpolator right_arm_interpolator_;
 	private KeyframeInterpolator left_arm_interpolator_;
+	private KeyframeInterpolator torso_interpolator_;
 	private int startTime_;
 	
 	private String splashtxt = "RUN, DUCK, AND JUMP!";
 	private boolean splashOn = true;
-	private String splashtxtClick = "CLICK ANYWHERE TO PLAY";
+	private String splashtxtClick = "     CLICK HERE TO PLAY";
 	private final int titleSize = 64;
 	private final int txtSize = 25;
 	private boolean diedOnce = false;
@@ -226,17 +245,20 @@ public class dino extends PApplet implements ApplicationConstants {
 			left_leg_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftleg_walkright);
 			right_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_rightarm_jump);
 			left_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftarm_jump);
+			torso_interpolator_ = new LinearKeyframeInterpolator(keyFrames_torso_default);
 		}else if(state == 4){
-			right_leg_interpolator_ = new LinearKeyframeInterpolator(keyFrames_rightleg_sliding);
-			left_leg_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftleg_sliding);
-			right_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_rightarm_sliding);
-			left_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftarm_sliding);
+//			right_leg_interpolator_ = new LinearKeyframeInterpolator(keyFrames_rightleg_sliding);
+//			left_leg_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftleg_sliding);
+//			right_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_rightarm_sliding);
+//			left_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftarm_sliding);
+			torso_interpolator_ = new LinearKeyframeInterpolator(keyFrames_torso_ducking);
 		}
 		else{//Default walk
 			right_leg_interpolator_ = new LinearKeyframeInterpolator(keyFrames_rightleg_walkright);
 			left_leg_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftleg_walkright);
 			right_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_rightarm_default);
 			left_arm_interpolator_ = new LinearKeyframeInterpolator(keyFrames_leftarm_default);
+			torso_interpolator_ = new LinearKeyframeInterpolator(keyFrames_torso_default);
 		}
 	}
 	
@@ -251,6 +273,7 @@ public class dino extends PApplet implements ApplicationConstants {
 		imageCloud = loadImage("data/cloud.png");
 		imageTree = loadImage("data/tree.png");
 		imageHeart = loadImage("data/heart.png");
+		imageWood = loadImage("data/wood.png");
 		
 		//-----------------------------
 		//	add random amount of ellipses
@@ -262,6 +285,7 @@ public class dino extends PApplet implements ApplicationConstants {
 		
 		objectList_ = new ArrayList<GraphicObject>();
 		backgroundList_ = new ArrayList<GraphicObject>();
+		bullets = new ArrayList<GraphicObject>();
 		offScreenBuffer_ = createGraphics(width, height);
 		GraphicObject.setAnimationMode(animationMode_);
 		addEllipse(backgroundList_, imageCloud);
@@ -269,11 +293,12 @@ public class dino extends PApplet implements ApplicationConstants {
 	}
 	
 	public void addEllipse(ArrayList<GraphicObject> objectList, PImage image) { 
-		
 		if(image == imageCloud) { 
 			objectList.add(new AnimatedEllipse(XMAX, random(YMAX-300, YMAX), 3.1415f, random(100,200), random(100,200), LINK_COLOR, random(-50, -500)-speed, 0, 0, image));
 		}else if(image == imageTree) { 
 			objectList.add(new AnimatedEllipse(XMAX, YMIN+160, 3.1415f, 100, 200, LINK_COLOR, random(-50, -500)-speed, 0, 0, image));
+		}else if(image == imageWood) {
+			objectList.add(new AnimatedBox(XMAX,YMIN+15,0,100,600,image,-300-speed,0,0));
 		}else {
 			objectList.add(new AnimatedEllipse(XMAX, YMIN+15, 0, 60, 60, LINK_COLOR, -300-speed, 0, 0, image));
 		}
@@ -282,17 +307,46 @@ public class dino extends PApplet implements ApplicationConstants {
 	public void draw() {
 		if(splashOn == true) {
 			clear();
+			PImage splashBackground = loadImage("forest.jpg");
+			splashBackground.resize(width, height);
+			background(splashBackground);
+			stroke(255);
+			strokeWeight(5);
+			fill(0, 0, 0);
+			rect(10, 45, 765, 65);
+			rect(210, 460, 350, 60);
 			textSize(titleSize);
-			color(255, 0, 0);
+			fill(148, 0, 211);
 			text(splashtxt, 30, 100);
 			textSize(txtSize);
 			text(splashtxtClick, 220, 500);
+			if(mouseX >= 210 && mouseX <= 560 && mouseY >= 460 && mouseY <= 520) {
+				fill(255, 255, 255);
+				rect(210, 460, 350, 60);
+				fill(148, 0, 211);
+				text(splashtxtClick, 220, 500);
+			}
 			if(diedOnce == true) {
+				fill(0, 0, 0);
+				rect(10, 45, 765, 65);
+				rect(210, 460, 350, 60);
+				rect(210, 620, 340, 60);
+				textSize(titleSize);
+				fill(148, 0, 211);
+				text(splashtxt, 30, 100);
+				textSize(txtSize);
+				text(splashtxtClick, 220, 500);
 				text("You died :(", 310, 650);
-				text("Last high score: " + high_score, 270, 750);
+				text("Last high score: " + high_score, 270, 670);
+				if(mouseX >= 210 && mouseX <= 560 && mouseY >= 460 && mouseY <= 520) {
+					fill(255, 255, 255);
+					rect(210, 460, 350, 60);
+					fill(148, 0, 211);
+					text(splashtxtClick, 220, 500);
+				}
 			}
 		}
-		else
+    else
 		{
 			PGraphics gc;
 			for (int i = 0; i < objectList_.size(); i++) {
@@ -301,16 +355,31 @@ public class dino extends PApplet implements ApplicationConstants {
 					objectList_.remove(i);
 					score += 1;
 				}
+      }
+
+		
+		for (int i = 0; i < bullets.size(); i++) {
+			//Check bounds
+			if(bullets.get(i).x_ >= XMAX) { 
+				bullets.remove(i);
 			}
-			
-			for (int i = 0; i < objectList_.size(); i++) {	
-				//Check hit
-				if(objectList_.get(i).x_ <= XMIN + 200 && objectList_.get(i).x_ > XMIN + 150 && state != 3) { 
-					score -= 1;
-					health --;
+		}
+		
+		for (int i = 0; i < objectList_.size(); i++) {
+			//Check hit
+			if (objectList_.get(i) instanceof AnimatedBox) {
+				if (objectList_.get(i).x_ <= XMIN + 200 && objectList_.get(i).x_ > XMIN + 150) {
+					health--;
+					objectList_.remove(i);
+				}
+			} else if (objectList_.get(i).x_ <= XMIN + 250 && objectList_.get(i).x_ > XMIN + 150) {
+				if(YMAX-550 + movement_v < objectList_.get(i).y_ + 50)
+				{
+					health--;
 					objectList_.remove(i);
 				}
 			}
+		}
 			if(health == 0) {
 				if(score > high_score) { 
 					high_score = score;
@@ -325,11 +394,14 @@ public class dino extends PApplet implements ApplicationConstants {
 				if(backgroundList_.get(i).x_ <= XMIN) { 
 					backgroundList_.remove(i);
 				}
-			}
-			
+				
+				
 			
 			if(random(0,9000) < (40 - objectList_.size()*10)) { 
 				addEllipse(objectList_, imageCircle);
+			}
+			else if(random(0,25000) < (40 - objectList_.size()*10)) { 
+				addEllipse(objectList_, imageWood);
 			}
 			
 			if(random(0,30000) < (100 - backgroundList_.size()*10)) { 
@@ -338,6 +410,7 @@ public class dino extends PApplet implements ApplicationConstants {
 			if(random(0,30000) < (100 - backgroundList_.size()*10)) { 
 				addEllipse(backgroundList_, imageTree);
 			}
+		}
 			
 			
 			
@@ -411,9 +484,31 @@ public class dino extends PApplet implements ApplicationConstants {
 	 		}
 	 		popMatrix();
 	 		
-	 		//Ellipses
+	 		//Interactable objects.
+	 		outerloop:
 	 		for (GraphicObject obj : objectList_)
+	 		{
+	 			if (obj instanceof AnimatedBox)
+	 			{
+	 				for (GraphicObject obj2 : bullets)
+	 				{
+	 					if ( ((AnimatedBox) obj).isHit(obj2.x_, obj2.y_, obj2.height_/2))
+	 					{
+	 						//System.out.println(obj2.x_);
+	 						//System.out.println(obj.x_);
+	 						objectList_.remove(obj);
+	 						bullets.remove(obj2);
+	 						score++;
+	 						break outerloop;
+	 					}
+	 					
+	 				}
+	 			}
 				obj.drawAllQuadrants(gc);
+	 		}
+
+	 		for (GraphicObject obj : bullets)
+				obj.draw(gc);
 	 		// 	Draw a horizontal line for the "ground"
 	 		gc.translate(0, -200);
 	 		gc.stroke(0);
@@ -439,13 +534,16 @@ public class dino extends PApplet implements ApplicationConstants {
 	 	 		
 	 	 	//  get current interpolated state for walking right (left arm)
 	 	 	float []theta4 = left_arm_interpolator_.computeStateVector(t);
+	 	 	
+	 	 	// get current interpolated state for torso
+	 	 	float []theta5 = torso_interpolator_.computeStateVector(t);
 	 		
 	 	 	
 	 	 	
 			if(state == 3 && t <= (.4f*modifier)) { 
-				movement_v += 6;
+				movement_v += 9;
 			}else if(state == 3 && t <= (.8f*modifier)) { 
-				movement_v -= 6;
+				movement_v -= 9;
 			}
 			
 			
@@ -459,96 +557,98 @@ public class dino extends PApplet implements ApplicationConstants {
 			}
 			
 			gc.translate(0, movement_v);
-			if(state != 4) {
-				gc.stroke(LINK_COLOR);
-				gc.strokeWeight(1);
-				gc.fill(LINK_COLOR);
-				gc.ellipse(0, Height+Torso_bottom+15, Height/3, Height/3);
-				gc.stroke(LINK_COLOR);
-				gc.strokeWeight(LINK_THICKNESS);
-				gc.line(0, Torso_bottom, 0, Height+Torso_bottom);
-				gc.noStroke();
-				gc.translate(0, Torso_bottom);
-			}
-			else
+			gc.stroke(LINK_COLOR);
+			gc.strokeWeight(1);
+			gc.fill(LINK_COLOR);
+			gc.ellipse(0, Height+Torso_bottom+15, Height/3, Height/3);
+			gc.stroke(LINK_COLOR);
+			gc.strokeWeight(LINK_THICKNESS);
+			//gc.line(0, Torso_bottom, 0, Height+Torso_bottom);
+			//gc.noStroke();
+			gc.translate(0, Torso_bottom);
+
+
+			gc.pushMatrix();
+			for (int i=1; i<theta1.length; i++)
 			{
-				gc.stroke(LINK_COLOR);
-				gc.strokeWeight(1);
-				gc.fill(LINK_COLOR);
-				gc.ellipse(-13, 9, Height/3, Height/3);
+				gc.rotate(theta1[i]);
+				
+	
 				gc.stroke(LINK_COLOR);
 				gc.strokeWeight(LINK_THICKNESS);
-				gc.line(0, 8, Height, 4);
-				gc.noStroke();
-				gc.translate(0, Torso_bottom);
+				gc.line(0, 0, L1[i], 0);	
+				gc.translate(L1[i], 0);
 			}
+			gc.popMatrix();
+			gc.pushMatrix();
+			for (int i=1; i<theta2.length; i++)
+			{
+				gc.rotate(theta2[i]);
+				
+	
+				gc.stroke(LINK_COLOR);
+				gc.strokeWeight(LINK_THICKNESS);
+				gc.line(0, 0, L2[i], 0);
 			
 	
-				gc.pushMatrix();
-				for (int i=1; i<theta1.length; i++)
-				{
-					gc.rotate(theta1[i]);
-					
-		
-					gc.stroke(LINK_COLOR);
-					gc.strokeWeight(LINK_THICKNESS);
-					gc.line(0, 0, L1[i], 0);	
-					gc.translate(L1[i], 0);
-				}
-				gc.popMatrix();
-				gc.pushMatrix();
-				for (int i=1; i<theta2.length; i++)
-				{
-					gc.rotate(theta2[i]);
-					
-		
-					gc.stroke(LINK_COLOR);
-					gc.strokeWeight(LINK_THICKNESS);
-					gc.line(0, 0, L2[i], 0);
-				
-		
-					gc.translate(L2[i], 0);
-				}
-				gc.popMatrix();
-				gc.pushMatrix();
-				gc.translate(0, Height);
-				for (int i=1; i<theta3.length; i++)
-				{	
-					gc.rotate(theta3[i]);
-					
-		
-					gc.stroke(LINK_COLOR);
-					gc.strokeWeight(LINK_THICKNESS);
-					gc.line(0, 0, L3[i], 0);
-			
-		
-					gc.translate(L3[i], 0);
-				}
-				gc.popMatrix();
-				gc.pushMatrix();
-				gc.translate(0, Height);
-				for (int i=1; i<theta4.length; i++)
-				{
-					gc.rotate(theta4[i]);
-					
-		
-					gc.stroke(LINK_COLOR);
-					gc.strokeWeight(LINK_THICKNESS);
-					gc.line(0, 0, L4[i], 0);
-			
-		
-					gc.translate(L4[i], 0);
-				}
-				gc.popMatrix();
+				gc.translate(L2[i], 0);
+			}
 			gc.popMatrix();
+			gc.pushMatrix();
+			gc.translate(0, Height);
+			for (int i=1; i<theta3.length; i++)
+			{	
+				gc.rotate(theta3[i]);
+				
+	
+				gc.stroke(LINK_COLOR);
+				gc.strokeWeight(LINK_THICKNESS);
+				gc.line(0, 0, L3[i], 0);
+		
+	
+				gc.translate(L3[i], 0);
+			}
+			gc.popMatrix();
+			gc.pushMatrix();
+			gc.translate(0, Height);
+			for (int i=1; i<theta4.length; i++)
+			{
+				gc.rotate(theta4[i]);
+				
+	
+				gc.stroke(LINK_COLOR);
+				gc.strokeWeight(LINK_THICKNESS);
+				gc.line(0, 0, L4[i], 0);
+		
+	
+				gc.translate(L4[i], 0);
+			}
+			gc.popMatrix();
+			gc.pushMatrix();
+			gc.translate(0, Height/14);
+			for (int i=1; i<theta5.length; i++)
+			{
+				gc.rotate(theta5[i]*3);
+				
+	
+				gc.stroke(LINK_COLOR);
+				gc.strokeWeight(LINK_THICKNESS);
+				gc.line(L5[i], 0, 0, 0);
+		
+	
+				gc.translate(L5[i], 0);
+			}
+			gc.popMatrix();
+			gc.popMatrix();
+			
 	
 			
 			//Update their state
-				if (animate_)
-				{
-					update();
-				}
-				frameCount_++;
+			if (animate_)
+			{
+				update();
+			}
+			frameCount_++;
 			
 				
 			//Increase the speed 
@@ -564,6 +664,11 @@ public class dino extends PApplet implements ApplicationConstants {
 			//  update the state of the objects ---> physics
 			float dt = (time - lastUpdateTime_)*0.001f;
 			
+			for (GraphicObject obj: bullets)
+			{
+				obj.update(dt);
+			}
+			
 			for (GraphicObject obj : objectList_)
 			{
 				if (obj instanceof AnimatedObject)
@@ -576,6 +681,10 @@ public class dino extends PApplet implements ApplicationConstants {
 				if (obj instanceof AnimatedObject)
 					obj.update(dt);
 
+			}
+			for (GraphicObject obj: bullets)
+			{
+				obj.update(dt);
 			}
 		}
 
@@ -619,6 +728,10 @@ public class dino extends PApplet implements ApplicationConstants {
 			drawRefFrame_ = !drawRefFrame_;
 			GraphicObject.setDrafReferenceFrame(drawRefFrame_);
 			break;
+		case 'w':
+			if(bullets.size() < 1)
+				bullets.add(new Bullet(XMIN+200, YMAX-525 + movement_v,0,20,20,0,400,0,0));
+			break;
 		
 		}
 		
@@ -626,7 +739,9 @@ public class dino extends PApplet implements ApplicationConstants {
 
 	public void mousePressed() {
 		if(splashOn == true) {
-			splashOn = false;
+			if(mouseX >= 210 && mouseX <= 560 && mouseY >= 460 && mouseY <= 520) {
+				splashOn = false;
+			}
 		}
 	}
 	
