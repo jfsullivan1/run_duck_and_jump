@@ -307,7 +307,6 @@ public class dino extends PApplet implements ApplicationConstants {
 	public void draw() {
 		if(splashOn == true) {
 			clear();
-			PImage splashBackground = loadImage("forest.jpg");
 			splashBackground.resize(width, height);
 			background(splashBackground);
 			stroke(255);
@@ -395,17 +394,13 @@ public class dino extends PApplet implements ApplicationConstants {
 				}
 			}
 			
-			if(random(0,9000) < (40 - objectList_.size()*10)) { 
 				addEllipse(objectList_, imageCircle);
 			}
-			else if(random(0,25000) < (40 - objectList_.size()*10)) { 
 				addEllipse(objectList_, imageWood);
 			}
 			
-			if(random(0,30000) < (100 - backgroundList_.size()*10)) { 
 				addEllipse(backgroundList_, imageCloud);
 			}
-			if(random(0,30000) < (100 - backgroundList_.size()*10)) { 
 				addEllipse(backgroundList_, imageTree);
 			}
 			
@@ -465,7 +460,6 @@ public class dino extends PApplet implements ApplicationConstants {
 	 		rotate(PI);
 	 		scale(5);
 	 		translate(-80, -80);
-	 		textSize(20);
 	 		gc.text(score, 10, 10);
 	 		
 	 		pushMatrix();
