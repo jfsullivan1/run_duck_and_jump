@@ -141,9 +141,9 @@ public class dino extends PApplet implements ApplicationConstants {
 									{-10000, -1.57f, 0, 0}};
 	private float [][]keyFrames_torso_ducking = {
 									{-10000, -1.57f, 0, 0}, // start 
-									{-10000, -1.57f, -0.3f, (0.1f*modifier)},
-									{-10000, -1.57f, -0.5f, (0.2f*modifier)},
-									{-10000, -1.57f, -0.7f, (0.3f*modifier)}};//bottom of duck
+//									{-10000, -1.57f, -0.3f, (0.1f*modifier)},
+//									{-10000, -1.57f, -0.5f, (0.2f*modifier)},
+									{-10000, -2.01f, 0, (0.00001f*modifier)}};//bottom of duck
 //									{-10000, -1.57f, -0.5f, (0.4f*modifier)},
 //									{-10000, -1.57f, -0.3f, (0.5f*modifier)},
 //									{-10000, -1.57f, 0, (0.4f*modifier)}}; // start
@@ -229,6 +229,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	private final int titleSize = 64;
 	private final int txtSize = 25;
 	private boolean diedOnce = false;
+	private int headX = 0;
 
 		
 	public void settings() 
@@ -554,7 +555,13 @@ public class dino extends PApplet implements ApplicationConstants {
 			gc.stroke(LINK_COLOR);
 			gc.strokeWeight(1);
 			gc.fill(LINK_COLOR);
-			gc.ellipse(0, Height+Torso_bottom+15, Height/3, Height/3);
+			if(state != 4) {
+				gc.ellipse(headX, Height+Torso_bottom+15, Height/3, Height/3);
+			}
+			else
+			{
+				gc.ellipse(headX+57, Height+20, Height/3, Height/3);
+			}
 			gc.stroke(LINK_COLOR);
 			gc.strokeWeight(LINK_THICKNESS);
 			//gc.line(0, Torso_bottom, 0, Height+Torso_bottom);
@@ -589,33 +596,57 @@ public class dino extends PApplet implements ApplicationConstants {
 			}
 			gc.popMatrix();
 			gc.pushMatrix();
-			gc.translate(0, Height);
-			for (int i=1; i<theta3.length; i++)
-			{	
-				gc.rotate(theta3[i]);
-				
-	
+			if(state != 4) {
+				gc.translate(0, Height);
+			}
+			else {
+				gc.translate(0, Height-8);
+			}
+			if(state != 4) {
+				for (int i=1; i<theta3.length; i++)
+				{	
+					gc.rotate(theta3[i]);
+					
+		
+					gc.stroke(LINK_COLOR);
+					gc.strokeWeight(LINK_THICKNESS);
+					gc.line(0, 0, L3[i], 0);
+			
+		
+					gc.translate(L3[i], 0);
+				}
+			}
+			else {
 				gc.stroke(LINK_COLOR);
 				gc.strokeWeight(LINK_THICKNESS);
-				gc.line(0, 0, L3[i], 0);
-		
-	
-				gc.translate(L3[i], 0);
+				gc.line(0, 0, 30, -30);
 			}
 			gc.popMatrix();
 			gc.pushMatrix();
-			gc.translate(0, Height);
-			for (int i=1; i<theta4.length; i++)
-			{
-				gc.rotate(theta4[i]);
-				
-	
+			if(state != 4) {
+				gc.translate(0, Height);
+			}
+			else {
+				gc.translate(0, Height-8);
+			}
+			if(state != 4) {
+				for (int i=1; i<theta4.length; i++)
+				{
+					gc.rotate(theta4[i]);
+					
+		
+					gc.stroke(LINK_COLOR);
+					gc.strokeWeight(LINK_THICKNESS);
+					gc.line(0, 0, L4[i], 0);
+			
+		
+					gc.translate(L4[i], 0);
+				}
+			}
+			else {
 				gc.stroke(LINK_COLOR);
 				gc.strokeWeight(LINK_THICKNESS);
-				gc.line(0, 0, L4[i], 0);
-		
-	
-				gc.translate(L4[i], 0);
+				gc.line(15, 0, 36, -30);
 			}
 			gc.popMatrix();
 			gc.pushMatrix();
