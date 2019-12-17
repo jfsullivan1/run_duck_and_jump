@@ -286,9 +286,9 @@ public class dino extends PApplet implements ApplicationConstants {
 		angryGuy = loadImage("data/lil_angry_guy.png");
 
 		//Sound files
-		die = new SoundFile(this, "death.wav");
-		jump = new SoundFile(this, "jump.wav");
-		fireball = new SoundFile(this, "fireball.wav");
+		die = new SoundFile(this, "data/death.wav");
+		jump = new SoundFile(this, "data/jump.wav");
+		fireball = new SoundFile(this, "data/fireball.wav");
 		//-----------------------------
 		//	add random amount of ellipses
 		//-----------------------------
@@ -322,6 +322,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	}
 	
 	public void draw() {
+		if(state == 4)new_state = true;
 		if(splashOn == true) {
 			clear();
 			PImage splashBackground = loadImage("data/forest.jpg");
@@ -752,24 +753,6 @@ public class dino extends PApplet implements ApplicationConstants {
 	
 	public void keyPressed() {
 		
-		if(new_state) {
-			switch (keyCode) {
-			case ' '://Jump
-				startTime_ = millis();
-				state = 3;
-				new_state = false;
-				jump.play();
-				interpolate();
-				break;
-			case DOWN:
-				startTime_ = millis();
-				state = 4;
-				new_state = false;
-				interpolate();
-				break;
-			}
-		}
-		
 		switch (key) {
 		case 'n':
 			GraphicObject.setBoundingBoxMode(BoundingBoxMode.NO_BOX);
@@ -787,12 +770,28 @@ public class dino extends PApplet implements ApplicationConstants {
 			drawRefFrame_ = !drawRefFrame_;
 			GraphicObject.setDrafReferenceFrame(drawRefFrame_);
 			break;
-		case 'w':
+		case ' ':
 			if(fireballs.size() < 1)
-			{
-				fireballs.add(new Fireball(XMIN+200, YMAX-525 + movement_v,0,20,20,0xFFff0000,400,0,0));
+				fireballs.add(new Bullet(XMIN+200, YMAX-525 + movement_v,0,20,20,0xFFff0000,400,0,0));
+
 				fireball.play();
+			break;
+		case 's':
+			if(new_state) {
+				startTime_ = millis();
+				state = 4;
+				new_state = false;
+				interpolate();
 			}
+			break;
+		case 'w':
+			if(new_state) {
+				startTime_ = millis();
+				state = 3;
+				new_state = false;
+				jump.play();
+				interpolate();
+
 			break;
 		
 		}
