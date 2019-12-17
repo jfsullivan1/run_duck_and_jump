@@ -306,6 +306,9 @@ public class dino extends PApplet implements ApplicationConstants {
 	}
 	
 	public void draw() {
+		
+		if(state == 4)new_state = true;
+		
 		if(splashOn == true) {
 			clear();
 			PImage splashBackground = loadImage("data/forest.jpg");
@@ -721,23 +724,6 @@ public class dino extends PApplet implements ApplicationConstants {
 	
 	public void keyPressed() {
 		
-		if(new_state) {
-			switch (keyCode) {
-			case ' '://Jump
-				startTime_ = millis();
-				state = 3;
-				new_state = false;
-				interpolate();
-				break;
-			case DOWN:
-				startTime_ = millis();
-				state = 4;
-				new_state = false;
-				interpolate();
-				break;
-			}
-		}
-		
 		switch (key) {
 		case 'n':
 			GraphicObject.setBoundingBoxMode(BoundingBoxMode.NO_BOX);
@@ -755,9 +741,25 @@ public class dino extends PApplet implements ApplicationConstants {
 			drawRefFrame_ = !drawRefFrame_;
 			GraphicObject.setDrafReferenceFrame(drawRefFrame_);
 			break;
-		case 'w':
+		case ' ':
 			if(bullets.size() < 1)
 				bullets.add(new Bullet(XMIN+200, YMAX-525 + movement_v,0,20,20,0,400,0,0));
+			break;
+		case 's':
+			if(new_state) {
+				startTime_ = millis();
+				state = 4;
+				new_state = false;
+				interpolate();
+			}
+			break;
+		case 'w':
+			if(new_state) {
+				startTime_ = millis();
+				state = 3;
+				new_state = false;
+				interpolate();
+			}
 			break;
 		
 		}
