@@ -14,7 +14,7 @@ public class Ellipse extends GraphicObject
 	/** image to be drawn 
 	 * 
 	 */
-	PImage image_;
+	public PImage image_;
 	
 	/** image to be drawn 
 	 * 

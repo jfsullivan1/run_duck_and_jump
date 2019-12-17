@@ -123,6 +123,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	PImage imageTree;
 	PImage imageHeart;
 	PImage imageWood;
+	PImage angryGuy;
 	
 	//-----------------------------
 	//	Modifies the time interval of the jump, (lower = longer)
@@ -132,7 +133,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	//-----------------------------
 	//	Health
 	//-----------------------------
-	private int health = 3;
+	private int health = 300;
 	
 	//----------------------Torso----------------------------------------------
 	
@@ -141,9 +142,9 @@ public class dino extends PApplet implements ApplicationConstants {
 									{-10000, -1.57f, 0, 0}};
 	private float [][]keyFrames_torso_ducking = {
 									{-10000, -1.57f, 0, 0}, // start 
-									{-10000, -1.57f, -0.3f, (0.1f*modifier)},
-									{-10000, -1.57f, -0.5f, (0.2f*modifier)},
-									{-10000, -1.57f, -0.7f, (0.3f*modifier)}};//bottom of duck
+//									{-10000, -1.57f, -0.3f, (0.1f*modifier)},
+//									{-10000, -1.57f, -0.5f, (0.2f*modifier)},
+									{-10000, -2.01f, 0, (0.00001f*modifier)}};//bottom of duck
 //									{-10000, -1.57f, -0.5f, (0.4f*modifier)},
 //									{-10000, -1.57f, -0.3f, (0.5f*modifier)},
 //									{-10000, -1.57f, 0, (0.4f*modifier)}}; // start
@@ -229,6 +230,9 @@ public class dino extends PApplet implements ApplicationConstants {
 	private final int titleSize = 64;
 	private final int txtSize = 25;
 	private boolean diedOnce = false;
+	private int headX = 0;
+	private int time;
+	private int entityTime;
 
 		
 	public void settings() 
@@ -274,6 +278,7 @@ public class dino extends PApplet implements ApplicationConstants {
 		imageTree = loadImage("data/tree.png");
 		imageHeart = loadImage("data/heart.png");
 		imageWood = loadImage("data/wood.png");
+		angryGuy = loadImage("data/lil_angry_guy.png");
 		
 		//-----------------------------
 		//	add random amount of ellipses
@@ -299,15 +304,18 @@ public class dino extends PApplet implements ApplicationConstants {
 			objectList.add(new AnimatedEllipse(XMAX, YMIN+160, 3.1415f, 100, 200, LINK_COLOR, random(-50, -500)-speed, 0, 0, image));
 		}else if(image == imageWood) {
 			objectList.add(new AnimatedBox(XMAX,YMIN+15,0,100,600,image,-300-speed,0,0));
-		}else {
+		}else if(image == imageCircle) {
 			objectList.add(new AnimatedEllipse(XMAX, YMIN+15, 0, 60, 60, LINK_COLOR, -300-speed, 0, 0, image));
+		}
+		else {
+			objectList_.add(new AnimatedEllipse(XMAX,YMIN+160,PI,100,100,LINK_COLOR,-300-speed,0,0,image));
 		}
 	}
 	
 	public void draw() {
 		if(splashOn == true) {
 			clear();
-			PImage splashBackground = loadImage("forest.jpg");
+			PImage splashBackground = loadImage("data/forest.jpg");
 			splashBackground.resize(width, height);
 			background(splashBackground);
 			stroke(255);
@@ -348,6 +356,7 @@ public class dino extends PApplet implements ApplicationConstants {
 		}
     else
 		{
+    	time = millis();
 			PGraphics gc;
 			for (int i = 0; i < objectList_.size(); i++) {
 				//Check bounds
@@ -372,11 +381,16 @@ public class dino extends PApplet implements ApplicationConstants {
 					health--;
 					objectList_.remove(i);
 				}
-			} else if (objectList_.get(i).x_ <= XMIN + 250 && objectList_.get(i).x_ > XMIN + 150) {
-				if(YMAX-550 + movement_v < objectList_.get(i).y_ + 50) {
+			} else if(objectList_.get(i).x_ <= XMIN + 220 && objectList_.get(i).x_ > XMIN + 150 && objectList_.get(i).y_ ==YMIN +15) {
+				if(YMAX-550 + movement_v < objectList_.get(i).y_ + 75) {
 					health--;
 					objectList_.remove(i);
 				}
+			}
+			else if (objectList_.get(i).x_ <= XMIN + 220 && objectList_.get(i).x_ > XMIN + 150 && state != 4)
+			{
+				health--;
+				objectList_.remove(i);
 			}
 		}
 			if(health == 0) {
@@ -395,20 +409,26 @@ public class dino extends PApplet implements ApplicationConstants {
 				}
 			}
 			
-			if(random(0,9000) < (40 - objectList_.size()*10)) { 
+			if(random(0,4000) < 100 && objectList_.size() < 3 && (time - entityTime > 300)) { 
 				addEllipse(objectList_, imageCircle);
+				entityTime = millis();
 			}
-			else if(random(0,25000) < (40 - objectList_.size()*10)) { 
+			else if(random(0,4000) < 100 && objectList_.size() < 5 && (time - entityTime > 300)) { 
 				addEllipse(objectList_, imageWood);
+				entityTime=millis();
+			}
+			else if(random(0,8000) < 100 && objectList_.size() < 5 && (time - entityTime > 500))
+			{
+				addEllipse(objectList_,angryGuy);
+				entityTime = millis();
 			}
 			
-			if(random(0,30000) < (100 - backgroundList_.size()*10)) { 
+			if(random(0,10000) < 100 && backgroundList_.size() < 3) { 
 				addEllipse(backgroundList_, imageCloud);
 			}
-			if(random(0,30000) < (100 - backgroundList_.size()*10)) { 
+			if(random(0,10000) < 100 && backgroundList_.size() < 6) { 
 				addEllipse(backgroundList_, imageTree);
 			}
-			
 			
 			
 			if (doDoubleBuffer_) 
@@ -465,7 +485,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	 		rotate(PI);
 	 		scale(5);
 	 		translate(-80, -80);
-	 		textSize(20);
+	 		textSize(10);
 	 		gc.text(score, 10, 10);
 	 		
 	 		pushMatrix();
@@ -557,7 +577,13 @@ public class dino extends PApplet implements ApplicationConstants {
 			gc.stroke(LINK_COLOR);
 			gc.strokeWeight(1);
 			gc.fill(LINK_COLOR);
-			gc.ellipse(0, Height+Torso_bottom+15, Height/3, Height/3);
+			if(state != 4) {
+				gc.ellipse(headX, Height+Torso_bottom+15, Height/3, Height/3);
+			}
+			else
+			{
+				gc.ellipse(headX+57, Height+20, Height/3, Height/3);
+			}
 			gc.stroke(LINK_COLOR);
 			gc.strokeWeight(LINK_THICKNESS);
 			//gc.line(0, Torso_bottom, 0, Height+Torso_bottom);
@@ -592,33 +618,57 @@ public class dino extends PApplet implements ApplicationConstants {
 			}
 			gc.popMatrix();
 			gc.pushMatrix();
-			gc.translate(0, Height);
-			for (int i=1; i<theta3.length; i++)
-			{	
-				gc.rotate(theta3[i]);
-				
-	
+			if(state != 4) {
+				gc.translate(0, Height);
+			}
+			else {
+				gc.translate(0, Height-8);
+			}
+			if(state != 4) {
+				for (int i=1; i<theta3.length; i++)
+				{	
+					gc.rotate(theta3[i]);
+					
+		
+					gc.stroke(LINK_COLOR);
+					gc.strokeWeight(LINK_THICKNESS);
+					gc.line(0, 0, L3[i], 0);
+			
+		
+					gc.translate(L3[i], 0);
+				}
+			}
+			else {
 				gc.stroke(LINK_COLOR);
 				gc.strokeWeight(LINK_THICKNESS);
-				gc.line(0, 0, L3[i], 0);
-		
-	
-				gc.translate(L3[i], 0);
+				gc.line(0, 0, 30, -30);
 			}
 			gc.popMatrix();
 			gc.pushMatrix();
-			gc.translate(0, Height);
-			for (int i=1; i<theta4.length; i++)
-			{
-				gc.rotate(theta4[i]);
-				
-	
+			if(state != 4) {
+				gc.translate(0, Height);
+			}
+			else {
+				gc.translate(0, Height-8);
+			}
+			if(state != 4) {
+				for (int i=1; i<theta4.length; i++)
+				{
+					gc.rotate(theta4[i]);
+					
+		
+					gc.stroke(LINK_COLOR);
+					gc.strokeWeight(LINK_THICKNESS);
+					gc.line(0, 0, L4[i], 0);
+			
+		
+					gc.translate(L4[i], 0);
+				}
+			}
+			else {
 				gc.stroke(LINK_COLOR);
 				gc.strokeWeight(LINK_THICKNESS);
-				gc.line(0, 0, L4[i], 0);
-		
-	
-				gc.translate(L4[i], 0);
+				gc.line(15, 0, 36, -30);
 			}
 			gc.popMatrix();
 			gc.pushMatrix();
@@ -727,7 +777,7 @@ public class dino extends PApplet implements ApplicationConstants {
 			break;
 		case 'w':
 			if(bullets.size() < 1)
-				bullets.add(new Bullet(XMIN+200, YMAX-525 + movement_v,0,20,20,0,400,0,0));
+				bullets.add(new Bullet(XMIN+200, YMAX-525 + movement_v,0,20,20,0xFFff0000,400,0,0));
 			break;
 		
 		}
