@@ -233,6 +233,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	private int headX = 0;
 	private int time;
 	private int entityTime;
+	private int scoreTime = millis();
 
 	//Sound files
 	SoundFile die;
@@ -376,7 +377,7 @@ public class dino extends PApplet implements ApplicationConstants {
 					score += 1;
 				}
       }
-
+			
 		// Check to see if the fireballs is past XMAX number and if so delete from the bullet list
 		for (int i = 0; i < fireballs.size(); i++) {
 			//Check bounds
@@ -401,10 +402,19 @@ public class dino extends PApplet implements ApplicationConstants {
 				}
 			}
 			// Check hit for the lakitu by checking if in a duck state.
-			else if (objectList_.get(i).x_ <= XMIN + 220 && objectList_.get(i).x_ > XMIN + 150 && state != 4)
+			else if (objectList_.get(i).x_ <= XMIN + 220 && objectList_.get(i).x_ > XMIN + 150)
 			{
-				health--;
-				objectList_.remove(i);
+				if(state != 4)
+				{
+					health--;
+					objectList_.remove(i);
+				}
+				else if (state == 4 && time - scoreTime > 200 )
+				{
+					scoreTime = millis();
+					score+=1;
+				}
+				
 			}
 		}
 			// if health is 0 the game will display the splash screen for death
