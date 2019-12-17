@@ -409,6 +409,7 @@ public class dino extends PApplet implements ApplicationConstants {
 				}
 			}
 			
+
 			if(random(0,4000) < 100 && objectList_.size() < 3 && (time - entityTime > 300)) { 
 				addEllipse(objectList_, imageCircle);
 				entityTime = millis();
