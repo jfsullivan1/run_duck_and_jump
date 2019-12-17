@@ -143,10 +143,10 @@ public class dino extends PApplet implements ApplicationConstants {
 									{-10000, -1.57f, 0, 0}, // start 
 									{-10000, -1.57f, -0.3f, (0.1f*modifier)},
 									{-10000, -1.57f, -0.5f, (0.2f*modifier)},
-									{-10000, -1.57f, -0.7f, (0.3f*modifier)},//bottom of duck
-									{-10000, -1.57f, -0.5f, (0.4f*modifier)},
-									{-10000, -1.57f, -0.3f, (0.5f*modifier)},
-									{-10000, -1.57f, 0, (0.4f*modifier)}}; // start
+									{-10000, -1.57f, -0.7f, (0.3f*modifier)}};//bottom of duck
+//									{-10000, -1.57f, -0.5f, (0.4f*modifier)},
+//									{-10000, -1.57f, -0.3f, (0.5f*modifier)},
+//									{-10000, -1.57f, 0, (0.4f*modifier)}}; // start
 	
 	//--------------------Right-Leg--------------------------------------------
 	
@@ -225,7 +225,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	
 	private String splashtxt = "RUN, DUCK, AND JUMP!";
 	private boolean splashOn = true;
-	private String splashtxtClick = "CLICK ANYWHERE TO PLAY";
+	private String splashtxtClick = "     CLICK HERE TO PLAY";
 	private final int titleSize = 64;
 	private final int txtSize = 25;
 	private boolean diedOnce = false;
@@ -307,14 +307,43 @@ public class dino extends PApplet implements ApplicationConstants {
 	public void draw() {
 		if(splashOn == true) {
 			clear();
+			PImage splashBackground = loadImage("forest.jpg");
+			splashBackground.resize(width, height);
+			background(splashBackground);
+			stroke(255);
+			strokeWeight(5);
+			fill(0, 0, 0);
+			rect(10, 45, 765, 65);
+			rect(210, 460, 350, 60);
 			textSize(titleSize);
-			color(255, 0, 0);
+			fill(148, 0, 211);
 			text(splashtxt, 30, 100);
 			textSize(txtSize);
 			text(splashtxtClick, 220, 500);
+			if(mouseX >= 210 && mouseX <= 560 && mouseY >= 460 && mouseY <= 520) {
+				fill(255, 255, 255);
+				rect(210, 460, 350, 60);
+				fill(148, 0, 211);
+				text(splashtxtClick, 220, 500);
+			}
 			if(diedOnce == true) {
+				fill(0, 0, 0);
+				rect(10, 45, 765, 65);
+				rect(210, 460, 350, 60);
+				rect(210, 620, 340, 60);
+				textSize(titleSize);
+				fill(148, 0, 211);
+				text(splashtxt, 30, 100);
+				textSize(txtSize);
+				text(splashtxtClick, 220, 500);
 				text("You died :(", 310, 650);
-				text("Last high score: " + high_score, 270, 750);
+				text("Last high score: " + high_score, 270, 670);
+				if(mouseX >= 210 && mouseX <= 560 && mouseY >= 460 && mouseY <= 520) {
+					fill(255, 255, 255);
+					rect(210, 460, 350, 60);
+					fill(148, 0, 211);
+					text(splashtxtClick, 220, 500);
+				}
 			}
 		}
     else
@@ -704,7 +733,9 @@ public class dino extends PApplet implements ApplicationConstants {
 
 	public void mousePressed() {
 		if(splashOn == true) {
-			splashOn = false;
+			if(mouseX >= 210 && mouseX <= 560 && mouseY >= 460 && mouseY <= 520) {
+				splashOn = false;
+			}
 		}
 	}
 	
