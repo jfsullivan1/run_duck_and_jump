@@ -230,6 +230,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	private final int titleSize = 64;
 	private final int txtSize = 25;
 	private boolean diedOnce = false;
+	private boolean instructionsOn = false;
 	private int headX = 0;
 	private int time;
 	private int entityTime;
@@ -325,31 +326,54 @@ public class dino extends PApplet implements ApplicationConstants {
 	public void draw() {
 		if(state == 4)new_state = true;
 		if(splashOn == true) {
+			//Clears the previous display
 			clear();
 			PImage splashBackground = loadImage("data/forest.jpg");
 			splashBackground.resize(width, height);
+			
+			//Puts a forest as the background of the splash screen
 			background(splashBackground);
+			
+			//Put in some buttons with text
 			stroke(255);
 			strokeWeight(5);
 			fill(0, 0, 0);
 			rect(10, 45, 765, 65);
 			rect(210, 460, 350, 60);
+			rect(210, 620, 350, 60);
 			textSize(titleSize);
 			fill(148, 0, 211);
 			text(splashtxt, 30, 100);
 			textSize(txtSize);
 			text(splashtxtClick, 220, 500);
+			
+			//Show instructions button if you haven't played and died yet
+			if(diedOnce == false) {
+				text("INSTRUCTIONS", 295, 660);
+			}
+			
+			//If you put mouse in the click to play button, it lights up
 			if(mouseX >= 210 && mouseX <= 560 && mouseY >= 460 && mouseY <= 520) {
 				fill(255, 255, 255);
 				rect(210, 460, 350, 60);
 				fill(148, 0, 211);
 				text(splashtxtClick, 220, 500);
 			}
+			
+			//If you put mouse in the instructions button, it lights up
+			if(mouseX >= 210 && mouseX <= 560 && mouseY >= 620 && mouseY <= 680 && diedOnce == false) {
+				fill(255, 255, 255);
+				rect(210, 620, 350, 60);
+				fill(148, 0, 211);
+				text("INSTRUCTIONS", 295, 660);
+			}
+			
+			//If you've already played and died, display high score on splash 
 			if(diedOnce == true) {
 				fill(0, 0, 0);
 				rect(10, 45, 765, 65);
 				rect(210, 460, 350, 60);
-				rect(210, 620, 340, 60);
+				rect(210, 620, 350, 60);
 				textSize(titleSize);
 				fill(148, 0, 211);
 				text(splashtxt, 30, 100);
@@ -365,7 +389,27 @@ public class dino extends PApplet implements ApplicationConstants {
 				}
 			}
 		}
-    else
+		
+		//Instructions page
+		else if(instructionsOn == true) {
+			clear();
+			background(167);
+			fill(148, 0, 211);
+			text("W Key - Jump \nS Key - Duck \nSpacebar - Shoot \nDuck under Lakitu, shoot wood, and jump over shrubs!", 50, 300);
+			fill(0,0,0);
+			rect(210, 620, 350, 60);
+			fill(148, 0, 211);
+			text("BACK", 350, 660);
+			
+			//Back button
+			if(mouseX >= 210 && mouseX <= 560 && mouseY >= 620 && mouseY <= 680 && diedOnce == false) {
+				fill(255, 255, 255);
+				rect(210, 620, 350, 60);
+				fill(148, 0, 211);
+				text("BACK", 350, 660);
+			}
+		}
+		else
 		{
     	time = millis();
 			PGraphics gc;
@@ -815,13 +859,25 @@ public class dino extends PApplet implements ApplicationConstants {
 		
 	}
 
-	public void mousePressed() {
+	public void mouseReleased() {
 		if(splashOn == true) {
 			if(mouseX >= 210 && mouseX <= 560 && mouseY >= 460 && mouseY <= 520) {
 				splashOn = false;
 			}
 		}
-	}
+		if(mouseX >= 210 && mouseX <= 560 && mouseY >= 620 && mouseY <= 680 && diedOnce == false) {
+			if(instructionsOn == true) {
+				instructionsOn = false;
+				splashOn = true;
+			}
+			else {
+				instructionsOn = true;
+				splashOn = false;
+			}
+				
+			}
+		}
+
 	
 	/**	Converts pixel coordinates into world coordinates
 	 * 
