@@ -216,8 +216,8 @@ public class Box extends GraphicObject
 		float distX = cx-testX;
 		float distY = cy-testY;
 		float distance = (float) Math.sqrt( (distX*distX) + (distY*distY) );
-		System.out.println(distance);
-		System.out.println(radius);
+		// If the distance to the closest edge of the fireball to the plank is smaller than the radius
+		// of the fireball, then it is inside the plank and registers a hit.
 		if (distance <= radius)
 		{
 			return true;

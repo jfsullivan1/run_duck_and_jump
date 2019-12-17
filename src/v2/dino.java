@@ -368,6 +368,7 @@ public class dino extends PApplet implements ApplicationConstants {
 		{
     	time = millis();
 			PGraphics gc;
+			// Checks if the objects are past the left side of the screen and deletes them from the list and adds to the score.
 			for (int i = 0; i < objectList_.size(); i++) {
 				//Check bounds
 				if(objectList_.get(i).x_ <= XMIN) { 
@@ -376,7 +377,7 @@ public class dino extends PApplet implements ApplicationConstants {
 				}
       }
 
-		
+		// Check to see if the fireballs is past XMAX number and if so delete from the bullet list
 		for (int i = 0; i < fireballs.size(); i++) {
 			//Check bounds
 			if(fireballs.get(i).x_ >= XMAX) { 
@@ -384,25 +385,29 @@ public class dino extends PApplet implements ApplicationConstants {
 			}
 		}
 		
+		// Deals with the hit detection of the obstacles. 
 		for (int i = 0; i < objectList_.size(); i++) {
-			//Check hit
+			//Check hit on the plank
 			if (objectList_.get(i) instanceof AnimatedBox) {
 				if (objectList_.get(i).x_ <= XMIN + 200 && objectList_.get(i).x_ > XMIN + 150) {
 					health--;
 					objectList_.remove(i);
 				}
+			  // Check hit for thornbush, when in the air aswell.
 			} else if(objectList_.get(i).x_ <= XMIN + 220 && objectList_.get(i).x_ > XMIN + 150 && objectList_.get(i).y_ ==YMIN +15) {
 				if(YMAX-550 + movement_v < objectList_.get(i).y_ + 75) {
 					health--;
 					objectList_.remove(i);
 				}
 			}
+			// Check hit for the lakitu by checking if in a duck state.
 			else if (objectList_.get(i).x_ <= XMIN + 220 && objectList_.get(i).x_ > XMIN + 150 && state != 4)
 			{
 				health--;
 				objectList_.remove(i);
 			}
 		}
+			// if health is 0 the game will display the splash screen for death
 			if(health == 0) {
 				if(score > high_score) { 
 					high_score = score;
@@ -413,14 +418,16 @@ public class dino extends PApplet implements ApplicationConstants {
 				setup();
 				
 			}
-			
+			// If any object in the background hits the left side of the screen it is removed from the objectlist
 			for (int i = 0; i < backgroundList_.size(); i++) {
 				if(backgroundList_.get(i).x_ <= XMIN) { 
 					backgroundList_.remove(i);
 				}
 			}
 			
-
+			// This deals with the generations of the obstacles.
+			// Wood planks can spawn at a faster rate than thorns, and thorns at a faster rate than lakitu
+			// Nothing is able to spawn for atleast 450 millis after something has spawned in.
 			if(random(0,4000) < 100 && objectList_.size() < 3 && (time - entityTime > 450)) { 
 				addEllipse(objectList_, imageCircle);
 				entityTime = millis();
