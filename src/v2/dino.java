@@ -378,7 +378,6 @@ public class dino extends PApplet implements ApplicationConstants {
 					health--;
 					objectList_.remove(i);
 				}
-			}
 		}
 			if(health == 0) {
 				if(score > high_score) { 
@@ -394,8 +393,6 @@ public class dino extends PApplet implements ApplicationConstants {
 				if(backgroundList_.get(i).x_ <= XMIN) { 
 					backgroundList_.remove(i);
 				}
-				
-				
 			
 			if(random(0,9000) < (40 - objectList_.size()*10)) { 
 				addEllipse(objectList_, imageCircle);
