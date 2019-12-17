@@ -43,7 +43,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	/**	Ratio of animation frames over rendering frames 
 	 * 
 	 */
-	static final int ANIMATION_RENDERING_FRAME_RATIO = 5;
+	static final int ANIMATION_RENDERING_FRAME_RATIO = 1;
 	
 	/**	computed animation frame rate
 	 * 
@@ -308,7 +308,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	public void draw() {
 		if(splashOn == true) {
 			clear();
-			PImage splashBackground = loadImage("forest.jpg");
+			PImage splashBackground = loadImage("data/forest.jpg");
 			splashBackground.resize(width, height);
 			background(splashBackground);
 			stroke(255);
@@ -373,9 +373,11 @@ public class dino extends PApplet implements ApplicationConstants {
 					health--;
 					objectList_.remove(i);
 				}
-			} else if (objectList_.get(i).x_ <= XMIN + 200 && objectList_.get(i).x_ > XMIN + 150 && state != 3) {
-				health--;
-				objectList_.remove(i);
+			} else if (objectList_.get(i).x_ <= XMIN + 220 && objectList_.get(i).x_ > XMIN + 150) {
+				if(YMAX-550 + movement_v < objectList_.get(i).y_ + 75) {
+					health--;
+					objectList_.remove(i);
+				}
 			}
 		}
 			if(health == 0) {
@@ -392,22 +394,21 @@ public class dino extends PApplet implements ApplicationConstants {
 				if(backgroundList_.get(i).x_ <= XMIN) { 
 					backgroundList_.remove(i);
 				}
+			}
 			
-			if(random(0,9000) < (40 - objectList_.size()*10)) { 
+			if(random(0,10000) < 100 && objectList_.size() < 3) { 
 				addEllipse(objectList_, imageCircle);
 			}
-			else if(random(0,25000) < (40 - objectList_.size()*10)) { 
+			else if(random(0,20000) < 100 && objectList_.size() < 5) { 
 				addEllipse(objectList_, imageWood);
 			}
 			
-			if(random(0,30000) < (100 - backgroundList_.size()*10)) { 
+			if(random(0,10000) < 100 && backgroundList_.size() < 3) { 
 				addEllipse(backgroundList_, imageCloud);
 			}
-			if(random(0,30000) < (100 - backgroundList_.size()*10)) { 
+			if(random(0,10000) < 100 && backgroundList_.size() < 6) { 
 				addEllipse(backgroundList_, imageTree);
 			}
-		}
-			
 			
 			
 			if (doDoubleBuffer_) 
@@ -464,7 +465,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	 		rotate(PI);
 	 		scale(5);
 	 		translate(-80, -80);
-	 		textSize(20);
+	 		textSize(10);
 	 		gc.text(score, 10, 10);
 	 		
 	 		pushMatrix();
@@ -494,6 +495,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	 						//System.out.println(obj.x_);
 	 						objectList_.remove(obj);
 	 						bullets.remove(obj2);
+	 						score+=1;
 	 						break outerloop;
 	 					}
 	 					
@@ -536,9 +538,9 @@ public class dino extends PApplet implements ApplicationConstants {
 	 	 	
 	 	 	
 			if(state == 3 && t <= (.4f*modifier)) { 
-				movement_v += 6;
+				movement_v += 9;
 			}else if(state == 3 && t <= (.8f*modifier)) { 
-				movement_v -= 6;
+				movement_v -= 9;
 			}
 			
 			
@@ -754,8 +756,8 @@ public class dino extends PApplet implements ApplicationConstants {
 			GraphicObject.setDrafReferenceFrame(drawRefFrame_);
 			break;
 		case 'w':
-			if(state != 3 && bullets.size() < 1)
-				bullets.add(new Bullet(XMIN+200, YMAX-525,0,20,20,0,400,0,0));
+			if(bullets.size() < 1)
+				bullets.add(new Bullet(XMIN+200, YMAX-525 + movement_v,0,20,20,0,400,0,0));
 			break;
 		
 		}
