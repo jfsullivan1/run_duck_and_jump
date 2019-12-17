@@ -772,7 +772,7 @@ public class dino extends PApplet implements ApplicationConstants {
 			break;
 		case ' ':
 			if(fireballs.size() < 1)
-				fireballs.add(new Bullet(XMIN+200, YMAX-525 + movement_v,0,20,20,0xFFff0000,400,0,0));
+				fireballs.add(new Fireball(XMIN+200, YMAX-525 + movement_v,0,20,20,0xFFff0000,400,0,0));
 
 				fireball.play();
 			break;
@@ -793,7 +793,7 @@ public class dino extends PApplet implements ApplicationConstants {
 				interpolate();
 
 			break;
-		
+			}
 		}
 		
 	}
