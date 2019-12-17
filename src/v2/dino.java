@@ -372,8 +372,8 @@ public class dino extends PApplet implements ApplicationConstants {
 					health--;
 					objectList_.remove(i);
 				}
-			} else if (objectList_.get(i).x_ <= XMIN + 250 && objectList_.get(i).x_ > XMIN + 150) {
-				if(YMAX-550 + movement_v < objectList_.get(i).y_ + 50) {
+			} else if (objectList_.get(i).x_ <= XMIN + 220 && objectList_.get(i).x_ > XMIN + 150) {
+				if(YMAX-550 + movement_v < objectList_.get(i).y_ + 75) {
 					health--;
 					objectList_.remove(i);
 				}
@@ -408,11 +408,6 @@ public class dino extends PApplet implements ApplicationConstants {
 			if(random(0,10000) < 100 && backgroundList_.size() < 6) { 
 				addEllipse(backgroundList_, imageTree);
 			}
-<<<<<<< HEAD
-=======
-		
->>>>>>> andrew
-			
 			
 			
 			if (doDoubleBuffer_) 
