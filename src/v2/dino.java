@@ -43,7 +43,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	/**	Ratio of animation frames over rendering frames 
 	 * 
 	 */
-	static final int ANIMATION_RENDERING_FRAME_RATIO = 5;
+	static final int ANIMATION_RENDERING_FRAME_RATIO = 1;
 	
 	/**	computed animation frame rate
 	 * 
@@ -372,9 +372,11 @@ public class dino extends PApplet implements ApplicationConstants {
 					health--;
 					objectList_.remove(i);
 				}
-			} else if (objectList_.get(i).x_ <= XMIN + 200 && objectList_.get(i).x_ > XMIN + 150 && state != 3) {
-				health--;
-				objectList_.remove(i);
+			} else if (objectList_.get(i).x_ <= XMIN + 250 && objectList_.get(i).x_ > XMIN + 150) {
+				if(YMAX-550 + movement_v < objectList_.get(i).y_ + 50) {
+					health--;
+					objectList_.remove(i);
+				}
 			}
 		}
 			if(health == 0) {
@@ -535,9 +537,9 @@ public class dino extends PApplet implements ApplicationConstants {
 	 	 	
 	 	 	
 			if(state == 3 && t <= (.4f*modifier)) { 
-				movement_v += 6;
+				movement_v += 9;
 			}else if(state == 3 && t <= (.8f*modifier)) { 
-				movement_v -= 6;
+				movement_v -= 9;
 			}
 			
 			
@@ -723,8 +725,8 @@ public class dino extends PApplet implements ApplicationConstants {
 			GraphicObject.setDrafReferenceFrame(drawRefFrame_);
 			break;
 		case 'w':
-			if(state != 3 && bullets.size() < 1)
-				bullets.add(new Bullet(XMIN+200, YMAX-525,0,20,20,0,400,0,0));
+			if(bullets.size() < 1)
+				bullets.add(new Bullet(XMIN+200, YMAX-525 + movement_v,0,20,20,0,400,0,0));
 			break;
 		
 		}
