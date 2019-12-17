@@ -393,6 +393,7 @@ public class dino extends PApplet implements ApplicationConstants {
 				if(backgroundList_.get(i).x_ <= XMIN) { 
 					backgroundList_.remove(i);
 				}
+			}
 			
 			if(random(0,9000) < (40 - objectList_.size()*10)) { 
 				addEllipse(objectList_, imageCircle);
@@ -407,7 +408,6 @@ public class dino extends PApplet implements ApplicationConstants {
 			if(random(0,30000) < (100 - backgroundList_.size()*10)) { 
 				addEllipse(backgroundList_, imageTree);
 			}
-		}
 			
 			
 			
@@ -495,6 +495,7 @@ public class dino extends PApplet implements ApplicationConstants {
 	 						//System.out.println(obj.x_);
 	 						objectList_.remove(obj);
 	 						bullets.remove(obj2);
+	 						score+=1;
 	 						break outerloop;
 	 					}
 	 					
